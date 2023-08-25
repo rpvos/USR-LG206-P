@@ -1,0 +1,31 @@
+{
+    "name": "USR-LG206-P",
+    "version": "1.0.0",
+    "description": "Driver library for the LoRa module USR-LG206-P.",
+    "keywords": "LoRa",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rpvos/USR-LG206-P.git"
+    },
+    "authors": [
+        {
+            "name": "Rik Vos",
+            "email": "Rik.Vos01@gmail.com",
+            "url": "http://rpvos.nl"
+        }
+    ],
+    "export": {
+        "exclude": [
+            "test/*"
+        ]
+    },
+    "license": "GNU 3",
+    "homepage": "http://rpvos.nl",
+    "dependencies": {},
+    "frameworks": [
+        "Arduino"
+    ],
+    "platforms": [
+        "atmelavr"
+    ]
+}
