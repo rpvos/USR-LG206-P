@@ -53,6 +53,12 @@ public:
     // TODO
     // int get_firmware_version();
 
+#define WMODE_TRANS 1 // Transparent transmission
+#define WMODE_FP 2    // Fixed-point transmitting
+
+    /// @brief Function used to set the workmode
+    /// @param wmode workmode (WMODE_TRANS = 1, WMODE_FP = 2)
+    /// @return true of succesfull, false if unsuccesfull
     int set_wmode(int wmode);
     // TODO
     // int get_wmode();
@@ -119,7 +125,13 @@ public:
     // TODO
     // int set_key();
 
+    /// @brief Function used to retrieve a message from the module
+    /// @return the data received
     String retrieve_message();
+
+    /// @brief Function used to send data
+    /// @param message data that needs to be send
+    /// @return amount of bytes written
     int send_message(char *message);
 };
 

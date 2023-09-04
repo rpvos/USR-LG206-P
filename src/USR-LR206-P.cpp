@@ -229,9 +229,6 @@ int USR_LG_206_P::save_as_default()
     return true;
 };
 
-#define WMODE_TRANS 1 // Transparent transmission
-#define WMODE_FP 2    // Fixed-point transmitting
-
 /// @brief Function used to set the workmode
 /// @param wmode workmode (WMODE_TRANS = 1, WMODE_FP = 2)
 /// @return true of succesfull, false if unsuccesfull
