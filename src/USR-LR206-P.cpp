@@ -5,6 +5,7 @@
 USR_LG_206_P::USR_LG_206_P(Stream *serial)
 {
     this->serial = serial;
+    this->settings = new USR_LG_206_P_t();
 };
 
 /// @brief Function used to set the value on the LoRa module

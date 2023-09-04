@@ -3,10 +3,77 @@
 
 #include <Arduino.h>
 
+// All settings for workmode
+#define WMODE_TRANS 1 // Transparent transmission
+#define WMODE_FP 2    // Fixed-point transmitting
+
+// All settings for baudrate
+#define BAUDRATE_1200 1
+#define BAUDRATE_2400 2
+#define BAUDRATE_4800 3
+#define BAUDRATE_9200 4
+#define BAUDRATE_19200 5
+#define BAUDRATE_38400 6
+#define BAUDRATE_57600 7
+#define BAUDRATE_115200 8
+
+// All settings for parity
+#define PARITY_NONE 1
+#define PARITY_EVEN 2
+#define PARITY_ODD 3
+
+// All settings for flowcontrol
+#define FLOWCONTROL_485 1
+#define FLOWCONTROL_NFC 2 // No Flow Control
+
+// All settings for power consumption mode
+#define POWERMODE_RUN 1 // Run mode
+#define POWERMODE_WU 2  // Wake up mode
+
+// All settings for LoRa air rate level (Speed)
+#define LoRaAirRateLevel_268 1
+#define LoRaAirRateLevel_488 2
+#define LoRaAirRateLevel_537 3
+#define LoRaAirRateLevel_878 4
+#define LoRaAirRateLevel_977 5
+#define LoRaAirRateLevel_1758 6
+#define LoRaAirRateLevel_3125 7
+#define LoRaAirRateLevel_6250 8
+#define LoRaAirRateLevel_10937 9
+#define LoRaAirRateLevel_21875 10
+
+struct USR_LG_206_P_UART_t
+{
+    char buadrate = BAUDRATE_115200;
+    char dataBits = 8;
+    char stopBits = 1;
+    char parity = PARITY_NONE;
+    char flowControl = FLOWCONTROL_485;
+};
+
+struct USR_LG_206_P_t
+{
+    bool ATMode = false;
+    bool commandEchoFunction = false;
+    int nodeID = -1;
+    String firmwareVersion = "";
+    char workMode = WMODE_TRANS;
+    USR_LG_206_P_UART_t uart;
+    char powerMode = POWERMODE_RUN;
+    int wakingUpInterval = 2000;
+    char loraAirRateLevel = LoRaAirRateLevel_21875;
+    unsigned int destinationAddress = 0;
+    char channel = 65;
+    bool forwardErrorCorrection = false;
+    char transmittingPower = 20;
+    char key[16]; // 16 bytes HEX format character string
+};
+
 class USR_LG_206_P
 {
 private:
     Stream *serial;
+    USR_LG_206_P_t *settings;
 
     /// @brief Function used to set the value on the LoRa module
     /// @param command which is used to set the value
@@ -20,6 +87,9 @@ private:
 
 public:
     USR_LG_206_P(Stream *serial);
+
+    // TODO
+    //  int retrieve_settings();
 
     /// @brief Function to start the AT mode
     /// @return true if succesfull and false if unsuccesfull
@@ -52,9 +122,6 @@ public:
     // int get_node_id();
     // TODO
     // int get_firmware_version();
-
-#define WMODE_TRANS 1 // Transparent transmission
-#define WMODE_FP 2    // Fixed-point transmitting
 
     /// @brief Function used to set the workmode
     /// @param wmode workmode (WMODE_TRANS = 1, WMODE_FP = 2)
