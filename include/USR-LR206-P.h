@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#define SETTING_UNDEFINED -1
+
 // All settings for workmode
 #define WMODE_TRANS 1 // Transparent transmission
 #define WMODE_FP 2    // Fixed-point transmitting
@@ -42,38 +44,61 @@
 #define LoRaAirRateLevel_10937 9
 #define LoRaAirRateLevel_21875 10
 
-struct USR_LG_206_P_UART_t
-{
-    char buadrate = BAUDRATE_115200;
-    char dataBits = 8;
-    char stopBits = 1;
-    char parity = PARITY_NONE;
-    char flowControl = FLOWCONTROL_485;
-};
-
-struct USR_LG_206_P_t
-{
-    bool ATMode = false;
-    bool commandEchoFunction = false;
-    int nodeID = -1;
-    String firmwareVersion = "";
-    char workMode = WMODE_TRANS;
-    USR_LG_206_P_UART_t uart;
-    char powerMode = POWERMODE_RUN;
-    int wakingUpInterval = 2000;
-    char loraAirRateLevel = LoRaAirRateLevel_21875;
-    unsigned int destinationAddress = 0;
-    char channel = 65;
-    bool forwardErrorCorrection = false;
-    char transmittingPower = 20;
-    char key[16]; // 16 bytes HEX format character string
-};
+// struct USR_LG_206_P_SETTINGS_DEFAULT
+// {
+//     bool ATMode = false;
+//     bool commandEchoFunction = false;
+//     int nodeID = -1;
+//     String firmwareVersion = "";
+//     char workMode = WMODE_TRANS;
+//     USR_LG_206_P_UART_SETTINGS uart;
+//     char powerMode = POWERMODE_RUN;
+//     int wakingUpInterval = 2000;
+//     char loraAirRateLevel = LoRaAirRateLevel_21875;
+//     unsigned int destinationAddress = 0;
+//     char channel = 65;
+//     bool forwardErrorCorrection = false;
+//     char transmittingPower = 20;
+//     char key[16]; // 16 bytes HEX format character string
+// };
 
 class USR_LG_206_P
 {
+public:
+    /// @brief Class used to store the settings of the UART of the LoRa module
+    class USR_LG_206_P_UART_SETTINGS
+    {
+    public:
+        char buadrate = BAUDRATE_115200;
+        char dataBits = 8;
+        char stopBits = 1;
+        char parity = PARITY_NONE;
+        char flowControl = FLOWCONTROL_485;
+    };
+
+    /// @brief Class used to store the settings of the LoRa module
+    class USR_LG_206_P_SETTINGS
+    {
+    public:
+        int ATMode = false;
+        int commandEchoFunction = SETTING_UNDEFINED;
+        int nodeID = SETTING_UNDEFINED;
+        String firmwareVersion = "";
+        int workMode = SETTING_UNDEFINED;
+        USR_LG_206_P_UART_SETTINGS *uart;
+        int powerMode = SETTING_UNDEFINED;
+        int wakingUpInterval = SETTING_UNDEFINED;
+        int loraAirRateLevel = SETTING_UNDEFINED;
+        unsigned int destinationAddress = SETTING_UNDEFINED;
+        int channel = SETTING_UNDEFINED;
+        bool forwardErrorCorrection = SETTING_UNDEFINED;
+        int transmittingPower = SETTING_UNDEFINED;
+        char key[16]; // 16 bytes HEX format character string
+    };
+
 private:
     Stream *serial;
-    USR_LG_206_P_t *settings;
+    USR_LG_206_P_SETTINGS *settings;
 
     /// @brief Function used to set the value on the LoRa module
     /// @param command which is used to set the value
@@ -89,7 +114,12 @@ public:
     USR_LG_206_P(Stream *serial);
 
     // TODO
-    //  int retrieve_settings();
+    int retrieve_settings();
+
+    // TODO ADD reset to factory settings
+
+    // TODO
+    //  int set_settings(USR_LG_206_P_SETTINGS* settings);
 
     /// @brief Function to start the AT mode
     /// @return true if succesfull and false if unsuccesfull

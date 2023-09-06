@@ -5,7 +5,17 @@
 USR_LG_206_P::USR_LG_206_P(Stream *serial)
 {
     this->serial = serial;
-    this->settings = new USR_LG_206_P_t();
+};
+
+int USR_LG_206_P::retrieve_settings()
+{
+    USR_LG_206_P_SETTINGS settings;
+    settings.ATMode = true;
+
+    settings.commandEchoFunction = get_echo();
+    // TODO add other settings
+
+    this->settings = &settings;
 };
 
 /// @brief Function used to set the value on the LoRa module
@@ -69,6 +79,12 @@ String USR_LG_206_P::get_command(String command)
 /// @return true if succesfull and false if unsuccesfull
 int USR_LG_206_P::begin_AT_mode()
 {
+    // Check if the LoRa module is already in AT mode
+    if (settings->ATMode)
+    {
+        return true;
+    }
+
     String data = "";
     String send = "+++";
     serial->println(send);
@@ -93,6 +109,7 @@ int USR_LG_206_P::begin_AT_mode()
         return false;
     }
 
+    settings->ATMode = true;
     return true;
 };
 
@@ -100,6 +117,12 @@ int USR_LG_206_P::begin_AT_mode()
 /// @return true if succesfull and false if unsuccesfull
 int USR_LG_206_P::end_AT_mode()
 {
+    // Check if LoRa module was already out of AT mode
+    if (!settings->ATMode)
+    {
+        return true;
+    }
+
     serial->println("AT+ENTM");
     String data = serial->readString();
     String expected = "OK";
@@ -110,6 +133,7 @@ int USR_LG_206_P::end_AT_mode()
     }
     else
     {
+        settings->ATMode = false;
         return true;
     }
 }
@@ -129,7 +153,16 @@ int USR_LG_206_P::set_echo(bool isOn)
         command += "OFF";
     }
 
-    return set_command(command);
+    int response = set_command(command);
+
+    // If the set command was done succesfull
+    if (response)
+    {
+        // Set the setting to the set value
+        settings->commandEchoFunction = isOn;
+    }
+
+    return response;
 };
 
 /// @brief Function used to get the currect value of the echo function command on the LoRa module,
@@ -137,6 +170,11 @@ int USR_LG_206_P::set_echo(bool isOn)
 /// @return The value of the echo command or -1 if not succeeded
 int USR_LG_206_P::get_echo()
 {
+    if (settings->commandEchoFunction != SETTING_UNDEFINED)
+    {
+        return settings->commandEchoFunction;
+    }
+
     String command = "+E";
 
     serial->println("AT" + command);
@@ -164,10 +202,12 @@ int USR_LG_206_P::get_echo()
     String value = data.substring(data.indexOf('='));
     if (value == "ON")
     {
+        settings->commandEchoFunction = true;
         return true;
     }
     else if (value == "OFF")
     {
+        settings->commandEchoFunction = false;
         return false;
     }
 
@@ -250,7 +290,16 @@ int USR_LG_206_P::set_wmode(int wmode = WMODE_TRANS)
         return false;
     }
 
-    return set_command(command);
+    int response = set_command(command);
+
+    // If the set command was done succesfull
+    if (response)
+    {
+        // Set the setting to the set value
+        settings->workMode = response;
+    }
+
+    return response;
 };
 
 /// @brief Function used to set the LoRa air rate level
@@ -272,7 +321,16 @@ int USR_LG_206_P::set_speed(int speed = 10)
     {
         String command = "+SPD=" + speed;
 
-        return set_command(command);
+        int response = set_command(command);
+
+        // If the set command was done succesfull
+        if (response)
+        {
+            // Set the setting to the set value
+            settings->loraAirRateLevel = response;
+        }
+
+        return response;
     }
 
     return false;
@@ -286,7 +344,17 @@ int USR_LG_206_P::set_address(int address = 0)
     if (0 <= address <= 65535)
     {
         String command = "+ADDR=" + address;
-        return set_command(command);
+
+        int response = set_command(command);
+
+        // If the set command was done succesfull
+        if (response)
+        {
+            // Set the setting to the set value
+            settings->destinationAddress = response;
+        }
+
+        return response;
     }
 
     return false;
@@ -302,7 +370,17 @@ int USR_LG_206_P::set_channel(int channel = 65)
     if (0 <= channel <= 127)
     {
         String command = "+CH=" + channel;
-        return set_command(command);
+
+        int response = set_command(command);
+
+        // If the set command was done succesfull
+        if (response)
+        {
+            // Set the setting to the set value
+            settings->channel = response;
+        }
+
+        return response;
     }
 
     return false;
