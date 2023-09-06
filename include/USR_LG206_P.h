@@ -1,5 +1,5 @@
 /**
- * @file USR-LR206-P.cpp
+ * @file USR_LG206_P.cpp
  * @author Rik Vos (rik.vos01@gmail.com)
  * @brief Library for using USR-LR206-P
  * @version 0.1
@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef USRLR206P_H_
-#define USRLR206P_H_
+#ifndef USR_LG_206P_H_
+#define USR_LG_206P_H_
 
 #include <Arduino.h>
 
@@ -299,6 +299,14 @@ private:
      * @return String containing this value
      */
     String get_command(String command);
+
+    /**
+     * @brief Function used to log a warning when received data is not what expected
+     *
+     * @param expected_data How the data should look like
+     * @param actual_data What it actually looks like
+     */
+    void log_warning(String expected_data, String actual_data);
 };
 
-#endif // USRLR206P_H_
+#endif // USR_LG206_P_H_

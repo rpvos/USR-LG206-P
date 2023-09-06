@@ -1,5 +1,5 @@
 /**
- * @file USR-LR206-P.cpp
+ * @file USR_LG206_P.cpp
  * @author Rik Vos (rik.vos01@gmail.com)
  * @brief Library for using USR-LR206-P
  * @version 0.1
@@ -9,7 +9,7 @@
  *
  */
 
-#include "USR-LR206-P.h"
+#include "USR_LG206_P.h"
 #include <Arduino.h>
 #include <ArduinoLog.h>
 
@@ -45,27 +45,27 @@ int USR_LG_206_P::begin_AT_mode(void)
         return true;
     }
 
-    String data = "";
-    String send = "+++";
-    serial->println(send);
+    String received_data = "";
+    String sent_data = "+++";
+    serial->println(sent_data);
 
-    data = serial->readString();
+    received_data = serial->readString();
 
-    String expected = "a";
-    if (data != expected)
+    String expected_data = "a";
+    if (received_data != expected_data)
     {
-        Log.warningln("Send: \"%s\" \t Expected: \"%s\" \t Recieved: \"%s\"", send.c_str(), expected.c_str(), data.c_str());
+        log_warning(expected_data, received_data);
         delay(1000);
         return false;
     }
 
-    send = "a";
-    serial->println(send);
-    data = serial->readString();
-    expected = "+OK";
-    if (data != expected)
+    sent_data = "a";
+    serial->println(sent_data);
+    received_data = serial->readString();
+    expected_data = "+OK";
+    if (received_data != expected_data)
     {
-        Log.warningln("Send: \"%s\" \t Expected: \"%s\" \t Recieved: \"%s\"", send.c_str(), expected.c_str(), data.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
@@ -82,11 +82,11 @@ int USR_LG_206_P::end_AT_mode(void)
     }
 
     serial->println("AT+ENTM");
-    String data = serial->readString();
-    String expected = "OK";
-    if (data != expected)
+    String received_data = serial->readString();
+    String expected_data = "OK";
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), data.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
     else
@@ -108,16 +108,16 @@ int USR_LG_206_P::set_echo(bool isOn)
         command += "OFF";
     }
 
-    int response = set_command(command);
+    int received_data = set_command(command);
 
     // If the set command was done succesfull
-    if (response)
+    if (received_data)
     {
         // Set the setting to the set value
         settings->commandEchoFunction = isOn;
     }
 
-    return response;
+    return received_data;
 };
 
 int USR_LG_206_P::get_echo(OUT bool &isOn)
@@ -130,28 +130,28 @@ int USR_LG_206_P::get_echo(OUT bool &isOn)
     String command = "+E";
 
     serial->println("AT" + command);
-    String expected = command;
-    String data = serial->readString();
+    String expected_data = command;
+    String received_data = serial->readString();
 
-    if (data != expected)
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), data.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
-    data = serial->readString();
+    received_data = serial->readString();
 
-    expected = "OK=";
+    expected_data = "OK=";
 
-    String subStringed = data.substring(0, data.indexOf('='));
+    String subStringed = received_data.substring(0, received_data.indexOf('='));
 
-    if (subStringed != expected)
+    if (subStringed != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), subStringed.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
-    String value = data.substring(data.indexOf('='));
+    String value = received_data.substring(received_data.indexOf('='));
     if (value == "ON")
     {
         settings->commandEchoFunction = true;
@@ -172,22 +172,22 @@ int USR_LG_206_P::restart(void)
 {
     String command = "AT+Z";
     serial->println(command);
-    String response = serial->readString();
-    String expected = command;
+    String received_data = serial->readString();
+    String expected_data = command;
 
-    if (response != expected)
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), response.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
-    response = serial->readString();
+    received_data = serial->readString();
 
-    expected = "OK";
+    expected_data = "OK";
 
-    if (response != expected)
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), response.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
@@ -198,22 +198,22 @@ int USR_LG_206_P::save_as_default(void)
 {
     String command = "AT+CFGTF";
     serial->println(command);
-    String response = serial->readString();
-    String expected = command;
+    String received_data = serial->readString();
+    String expected_data = command;
 
-    if (response != expected)
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), response.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
-    response = serial->readString();
+    received_data = serial->readString();
 
-    expected = "+CFGTF:SAVED";
+    expected_data = "+CFGTF:SAVED";
 
-    if (response != expected)
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), response.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
@@ -224,22 +224,22 @@ int USR_LG_206_P::reset_to_default(void)
 {
     String command = "AT+RELD";
     serial->println(command);
-    String response = serial->readString();
-    String expected = command;
+    String received_data = serial->readString();
+    String expected_data = command;
 
-    if (response != expected)
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), response.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
-    response = serial->readString();
+    received_data = serial->readString();
 
-    expected = "REBOOTING";
+    expected_data = "REBOOTING";
 
-    if (response != expected)
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), response.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
@@ -271,16 +271,16 @@ int USR_LG_206_P::set_wmode(int wmode = WMODE_TRANS)
         return false;
     }
 
-    int response = set_command(command);
+    int received_data = set_command(command);
 
     // If the set command was done succesfull
-    if (response)
+    if (received_data)
     {
         // Set the setting to the set value
-        settings->workMode = response;
+        settings->workMode = received_data;
     }
 
-    return response;
+    return received_data;
 };
 
 int USR_LG_206_P::get_wmode(OUT int &wmode)
@@ -330,16 +330,20 @@ int USR_LG_206_P::set_speed(int speed = 10)
     {
         String command = "+SPD=" + speed;
 
-        int response = set_command(command);
+        int received_data = set_command(command);
 
         // If the set command was done succesfull
-        if (response)
+        if (received_data)
         {
             // Set the setting to the set value
-            settings->loraAirRateLevel = response;
+            settings->loraAirRateLevel = received_data;
         }
 
-        return response;
+        return received_data;
+    }
+    else
+    {
+        log_warning("0-10", "" + speed);
     }
 
     return false;
@@ -353,16 +357,20 @@ int USR_LG_206_P::set_address(int address = 0)
     {
         String command = "+ADDR=" + address;
 
-        int response = set_command(command);
+        int received_data = set_command(command);
 
         // If the set command was done succesfull
-        if (response)
+        if (received_data)
         {
             // Set the setting to the set value
-            settings->destinationAddress = response;
+            settings->destinationAddress = received_data;
         }
 
-        return response;
+        return received_data;
+    }
+    else
+    {
+        log_warning("0-65535", "" + address);
     }
 
     return false;
@@ -374,16 +382,20 @@ int USR_LG_206_P::set_channel(int channel = 65)
     {
         String command = "+CH=" + channel;
 
-        int response = set_command(command);
+        int received_data = set_command(command);
 
         // If the set command was done succesfull
-        if (response)
+        if (received_data)
         {
             // Set the setting to the set value
-            settings->channel = response;
+            settings->channel = received_data;
         }
 
-        return response;
+        return received_data;
+    }
+    else
+    {
+        log_warning("0-127", "" + channel);
     }
 
     return false;
@@ -414,19 +426,19 @@ int USR_LG_206_P::send_message(char *message)
 int USR_LG_206_P::set_command(String command)
 {
     serial->println("AT" + command);
-    String expected = command;
-    String data = serial->readString();
-    if (data != expected)
+    String expected_data = command;
+    String received_data = serial->readString();
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), data.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
-    data = serial->readString();
-    expected = "OK";
-    if (data != expected)
+    received_data = serial->readString();
+    expected_data = "OK";
+    if (received_data != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), data.c_str());
+        log_warning(expected_data, received_data);
         return false;
     }
 
@@ -436,28 +448,33 @@ int USR_LG_206_P::set_command(String command)
 String USR_LG_206_P::get_command(String command)
 {
     serial->println("AT" + command);
-    String expected = command;
-    String data = serial->readString();
+    String expected_data = command;
+    String received = serial->readString();
 
-    if (data != expected)
+    if (received != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), data.c_str());
+        log_warning(expected_data, received);
         return "";
     }
 
-    data = serial->readString();
+    received = serial->readString();
 
-    expected = command + ":";
+    expected_data = command + ":";
 
-    String subStringed = data.substring(0, data.indexOf(':'));
+    String subStringed = received.substring(0, received.indexOf(':'));
 
-    if (subStringed != expected)
+    if (subStringed != expected_data)
     {
-        Log.warningln("Received data is not \"%s\" but \"%s\"", expected.c_str(), data.c_str());
+        log_warning(expected_data, received);
         return "";
     }
 
-    String value = data.substring(data.indexOf(':'), data.indexOf("OK"));
+    String value = received.substring(received.indexOf(':'), received.indexOf("OK"));
 
     return value;
+};
+
+void USR_LG_206_P::log_warning(String expected_data, String actual_data)
+{
+    Log.warningln("Received received_data is not \"%s\" but \"%s\"", expected_data.c_str(), actual_data.c_str());
 };
