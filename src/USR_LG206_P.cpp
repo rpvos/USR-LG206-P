@@ -25,17 +25,17 @@ int USR_LG_206_P_UART_SETTINGS::fromString(String input)
     input = input.substring(index);
     this->buadrate = Baudrate(baudrate.toInt());
 
-    int index = input.indexOf(',');
+    index = input.indexOf(',');
     String dataBits = input.substring(0, index);
     input = input.substring(index);
     this->dataBits = dataBits.toInt();
 
-    int index = input.indexOf(',');
+    index = input.indexOf(',');
     String stopBits = input.substring(0, index);
     input = input.substring(index);
     this->stopBits = stopBits.toInt();
 
-    int index = input.indexOf(',');
+    index = input.indexOf(',');
     String parity = input.substring(0, index);
     input = input.substring(index);
     this->parity = ParityFromString(input);
@@ -54,17 +54,19 @@ USR_LG_206_P::USR_LG_206_P(Stream *serial)
 int USR_LG_206_P::factory_reset(void)
 {
     USR_LG_206_P_SETTINGS_t settings = factory_settings;
-    set_settings(&settings);
+    return set_settings(&settings);
 }
 
 int USR_LG_206_P::set_settings(USR_LG_206_P_SETTINGS_t *settings)
 {
     // TODO add setter for every setting
+    return false;
 }
 
 int USR_LG_206_P::get_settings(OUT USR_LG_206_P_SETTINGS_t &settings)
 {
     // TODO use getter for every setting
+    return false;
 }
 
 int USR_LG_206_P::begin_AT_mode(void)
@@ -396,8 +398,23 @@ int USR_LG_206_P::set_uart(USR_LG_206_P_UART_SETTINGS *uart_settings)
     return false;
 };
 
-int USR_LG_206_P::get_uart(OUT USR_LG_206_P_UART_SETTINGS &settings){
+int USR_LG_206_P::get_uart(OUT USR_LG_206_P_UART_SETTINGS &uart_settings)
+{
+    if (settings->uart != 0)
+    {
+        uart_settings = *settings->uart;
+        return true;
+    }
 
+    String command = "+UART";
+    String value = get_command(command);
+
+    if (uart_settings.fromString(value))
+    {
+        return true;
+    }
+
+    return false;
 };
 
 int USR_LG_206_P::set_power_consumption_mode(PowerConsumptionMode powermode = powermode_run)

@@ -100,7 +100,7 @@ inline Parity ParityFromString(String data)
  * @brief All settings for flowcontrol
  *
  */
-typedef enum Flowcontrol
+enum Flowcontrol
 {
     flowcontrol_undefined = -1,
     flowcontrol_485 = 1,
