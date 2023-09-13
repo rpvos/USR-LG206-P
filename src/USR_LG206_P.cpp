@@ -361,7 +361,7 @@ int USR_LG_206_P::set_uart(USR_LG_206_P_UART_SETTINGS *uart_settings)
     if (received_data)
     {
         // Set the setting to the set value
-        settings->uart = uart_settings;
+        settings->set_uart(uart_settings);
         return true;
     }
 
@@ -370,9 +370,9 @@ int USR_LG_206_P::set_uart(USR_LG_206_P_UART_SETTINGS *uart_settings)
 
 int USR_LG_206_P::get_uart(OUT USR_LG_206_P_UART_SETTINGS &uart_settings)
 {
-    if (settings->uart != 0)
+    if (settings->get_uart() != 0)
     {
-        uart_settings = *settings->uart;
+        uart_settings = *settings->get_uart();
         return true;
     }
 
