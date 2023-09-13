@@ -354,13 +354,20 @@ public:
      */
     int get_wmode(OUT WorkMode &wmode);
 
-    // TODO
+    /**
+     * @brief Set the uart settings of the LoRa module
+     *
+     * @param settings variable containing the requested settings
+     * @return true if succesfull, false if unsuccesfull
+     */
     int set_uart(USR_LG_206_P_UART_SETTINGS *settings);
 
-    // TODO
-    /// @brief Function used to get the uart settings
-    /// @param settings OUTPUT variable used to store the requested value
-    /// @return true if succesfull, false if unsuccesfull
+    /**
+     * @brief Get the uart settings of the LoRa module
+     *
+     * @param settings OUTPUT variable used to store the requested value
+     * @return true if succesfull, false if unsuccesfull
+     */
     int get_uart(OUT USR_LG_206_P_UART_SETTINGS &settings);
 
     /**
