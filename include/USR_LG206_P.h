@@ -207,7 +207,7 @@ typedef struct
  * @brief Settings used by the manufacturer
  *
  */
-USR_LG_206_P_SETTINGS_t factory_settings = {
+extern USR_LG_206_P_SETTINGS_t factory_settings = {
     .ATMode = false,
     .commandEchoFunction = false,
     .nodeID = "",
@@ -229,7 +229,7 @@ USR_LG_206_P_SETTINGS_t factory_settings = {
  * @brief Settings set to undefined to know which settings need to be retrieved from device
  *
  */
-USR_LG_206_P_SETTINGS_t undefined_settings = {
+extern USR_LG_206_P_SETTINGS_t undefined_settings = {
     .ATMode = false,
     .commandEchoFunction = SETTING_UNDEFINED,
     .nodeID = "",
