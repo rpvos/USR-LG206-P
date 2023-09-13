@@ -15,32 +15,35 @@
 
 String USR_LG_206_P_UART_SETTINGS::toString(void)
 {
-    return String(this->buadrate) + "," + String(this->dataBits) + "," + String(this->stopBits) + "," + ToString(this->parity) + "," + ToString(this->flowControl);
+    return "";
+    // return String(this->buadrate) + "," + String(this->dataBits) + "," + String(this->stopBits) + "," + ToString(this->parity) + "," + ToString(this->flowControl);
 };
 
 int USR_LG_206_P_UART_SETTINGS::fromString(String input)
 {
-    int index = input.indexOf(',');
-    String baudrate = input.substring(0, index);
-    input = input.substring(index);
-    this->buadrate = Baudrate(baudrate.toInt());
 
-    index = input.indexOf(',');
-    String dataBits = input.substring(0, index);
-    input = input.substring(index);
-    this->dataBits = dataBits.toInt();
+    return false;
+    // int index = input.indexOf(',');
+    // String baudrate = input.substring(0, index);
+    // input = input.substring(index);
+    // this->buadrate = Baudrate(baudrate.toInt());
 
-    index = input.indexOf(',');
-    String stopBits = input.substring(0, index);
-    input = input.substring(index);
-    this->stopBits = stopBits.toInt();
+    // index = input.indexOf(',');
+    // String dataBits = input.substring(0, index);
+    // input = input.substring(index);
+    // this->dataBits = dataBits.toInt();
 
-    index = input.indexOf(',');
-    String parity = input.substring(0, index);
-    input = input.substring(index);
-    this->parity = ParityFromString(input);
+    // index = input.indexOf(',');
+    // String stopBits = input.substring(0, index);
+    // input = input.substring(index);
+    // this->stopBits = stopBits.toInt();
 
-    this->flowControl = FlowcontrolFromString(input);
+    // index = input.indexOf(',');
+    // String parity = input.substring(0, index);
+    // input = input.substring(index);
+    // this->parity = ParityFromString(input);
+
+    // this->flowControl = FlowcontrolFromString(input);
     return true;
 };
 
