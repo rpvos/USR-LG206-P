@@ -570,6 +570,7 @@ int USR_LG_206_P::set_address(int address = 0)
     {
         // Set the setting to the set value
         settings->destinationAddress = address;
+        settings->destinationAddressIsSet = true;
         return true;
     }
 
@@ -578,7 +579,7 @@ int USR_LG_206_P::set_address(int address = 0)
 
 int USR_LG_206_P::get_address(OUT int &address)
 {
-    if (settings->destinationAddress != SETTING_UNDEFINED)
+    if (settings->destinationAddressIsSet)
     {
         address = settings->destinationAddress;
         return true;
@@ -590,6 +591,7 @@ int USR_LG_206_P::get_address(OUT int &address)
     if (value)
     {
         settings->destinationAddress = value.toInt();
+        settings->destinationAddressIsSet = true;
         address = value.toInt();
         return true;
     }

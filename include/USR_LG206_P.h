@@ -195,6 +195,7 @@ typedef struct
     int wakeUpInterval;
     LoRaAirRateLevel loraAirRateLevel;
     unsigned int destinationAddress;
+    bool destinationAddressIsSet;
     int channel;
     int forwardErrorCorrection;
     int transmittingPower;
@@ -217,6 +218,7 @@ USR_LG_206_P_SETTINGS_t factory_settings = {
     .wakeUpInterval = 2000,
     .loraAirRateLevel = LoRa_air_rate_level_21875,
     .destinationAddress = 0,
+    .destinationAddressIsSet = true,
     .channel = 65,
     .forwardErrorCorrection = false,
     .transmittingPower = 20,
@@ -238,6 +240,7 @@ USR_LG_206_P_SETTINGS_t undefined_settings = {
     .wakeUpInterval = SETTING_UNDEFINED,
     .loraAirRateLevel = LoRa_air_rate_level_undefined,
     .destinationAddress = 0,
+    .destinationAddressIsSet = false,
     .channel = SETTING_UNDEFINED,
     .forwardErrorCorrection = SETTING_UNDEFINED,
     .transmittingPower = SETTING_UNDEFINED,
