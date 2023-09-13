@@ -43,10 +43,10 @@ public:
     int factory_reset(void);
 
     // TODO
-    int set_settings(USR_LG_206_P_SETTINGS_t *settings);
+    int set_settings(USR_LG_206_P_SETTINGS *settings);
 
     // TODO
-    int get_settings(OUT USR_LG_206_P_SETTINGS_t &settings);
+    int get_settings(OUT USR_LG_206_P_SETTINGS &settings);
 
     /**
      * @brief Function to start the AT mode
@@ -332,7 +332,7 @@ private:
      * @brief Object to keep the settings of the LoRa module
      * This is to counter frequent calls
      */
-    USR_LG_206_P_SETTINGS_t *settings;
+    USR_LG_206_P_SETTINGS *settings;
 
     /**
      * @brief Function used to set the value on the LoRa module

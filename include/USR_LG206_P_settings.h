@@ -151,12 +151,13 @@ enum LoRaAirRateLevel
 class USR_LG_206_P_UART_SETTINGS
 {
 public:
-    Baudrate buadrate = baudrate_115200;
-    char dataBits = 8;
-    char stopBits = 1;
-    Parity parity = parity_none;
-    Flowcontrol flowControl = flowcontrol_485;
+    Baudrate buadrate;
+    char dataBits;
+    char stopBits;
+    Parity parity;
+    Flowcontrol flowControl;
 
+    USR_LG_206_P_UART_SETTINGS(bool usingFactorySettings);
     String toString(void);
     int fromString(String);
 };
@@ -165,14 +166,14 @@ public:
  * @brief Struct defined to store settings of the USR_LG206_P module
  *
  */
-typedef struct
+class USR_LG_206_P_SETTINGS
 {
+public:
     int ATMode;
     int commandEchoFunction;
     String nodeID;
     String firmwareVersion;
     WorkMode workMode;
-    USR_LG_206_P_UART_SETTINGS *uart;
     PowerConsumptionMode powerMode;
     int wakeUpInterval;
     LoRaAirRateLevel loraAirRateLevel;
@@ -183,6 +184,13 @@ typedef struct
     int transmittingPower;
     int testInterval;
     String key; // 16 bytes HEX format character string
-} USR_LG_206_P_SETTINGS_t;
+
+    USR_LG_206_P_SETTINGS(bool usingFactorySettings);
+    USR_LG_206_P_UART_SETTINGS *get_uart(void);
+    void set_uart(USR_LG_206_P_UART_SETTINGS *newUARTSettings);
+
+private:
+    USR_LG_206_P_UART_SETTINGS *uart;
+};
 
 #endif // USR_LG206_P_SETTINGS_H_
