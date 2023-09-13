@@ -19,111 +19,230 @@
  *
  */
 #define OUT
+
 /**
  * @brief SETTING_UNDEFINED is used as a identifier for not yet retrieved or set settings
  *
  */
 #define SETTING_UNDEFINED -1
 
-// All settings for workmode
-#define WMODE_TRANS 1 // Transparent transmission
-#define WMODE_FP 2    // Fixed-point transmitting
-
-// All settings for baudrate
-#define BAUDRATE_1200 1
-#define BAUDRATE_2400 2
-#define BAUDRATE_4800 3
-#define BAUDRATE_9200 4
-#define BAUDRATE_19200 5
-#define BAUDRATE_38400 6
-#define BAUDRATE_57600 7
-#define BAUDRATE_115200 8
-
-// All settings for parity
-#define PARITY_NONE 1
-#define PARITY_EVEN 2
-#define PARITY_ODD 3
-
-// All settings for flowcontrol
-#define FLOWCONTROL_485 1 // 485 Flow Control
-#define FLOWCONTROL_NFC 2 // No Flow Control
-
-// All settings for power consumption mode
-#define POWERMODE_RUN 1 // Run mode
-#define POWERMODE_WU 2  // Wake up mode
-
-// All settings for LoRa air rate level (Speed)
-#define LoRaAirRateLevel_268 1
-#define LoRaAirRateLevel_488 2
-#define LoRaAirRateLevel_537 3
-#define LoRaAirRateLevel_878 4
-#define LoRaAirRateLevel_977 5
-#define LoRaAirRateLevel_1758 6
-#define LoRaAirRateLevel_3125 7
-#define LoRaAirRateLevel_6250 8
-#define LoRaAirRateLevel_10937 9
-#define LoRaAirRateLevel_21875 10
-
-class USR_LG_206_P_UART_SETTINGS
+/**
+ * @brief All settings for workmode
+ *
+ */
+enum WorkMode
 {
-    char buadrate = BAUDRATE_115200;
-    char dataBits = 8;
-    char stopBits = 1;
-    char parity = PARITY_NONE;
-    char flowControl = FLOWCONTROL_485;
+    work_mode_undefined = -1,
+    work_mode_transparent = 1,
+    work_mode_fixed_point = 2
 };
 
+/**
+ * @brief All settings for baudrate
+ *
+ */
+enum Baudrate
+{
+    baudrate_1200 = 1200,
+    baudrate_2400 = 2400,
+    baudrate_4800 = 4800,
+    baudrate_9200 = 9200,
+    baudrate_19200 = 19200,
+    baudrate_38400 = 38400,
+    baudrate_57600 = 57600,
+    baudrate_115200 = 115200,
+};
+
+/**
+ * @brief All settings for parity
+ *
+ */
+enum Parity
+{
+    parity_undefined = -1,
+    parity_none = 1,
+    parity_even = 2,
+    parity_odd = 3,
+};
+inline const char *ToString(Parity parity)
+{
+    switch (parity)
+    {
+    case parity_none:
+        return "NONE";
+    case parity_even:
+        return "EVEN";
+    case parity_odd:
+        return "ODD";
+    default:
+        return "Undefined parity";
+    }
+};
+inline Parity ParityFromString(String data)
+{
+    if (data == "NONE")
+    {
+        return parity_none;
+    }
+    else if (data == "EVEN")
+    {
+        return parity_even;
+    }
+    else if (data == "ODD")
+    {
+        return parity_odd;
+    }
+
+    return parity_undefined;
+};
+
+/**
+ * @brief All settings for flowcontrol
+ *
+ */
+typedef enum Flowcontrol
+{
+    flowcontrol_undefined = -1,
+    flowcontrol_485 = 1,
+    flowcontrol_nfc = 2,
+};
+inline const char *ToString(Flowcontrol flowcontrol)
+{
+    switch (flowcontrol)
+    {
+    case flowcontrol_485:
+        return "485";
+    case flowcontrol_nfc:
+        return "NFC";
+    default:
+        return "Undefined flowcontrol";
+    }
+};
+inline Flowcontrol FlowcontrolFromString(String data)
+{
+    if (data == "485")
+    {
+        return flowcontrol_485;
+    }
+    else if (data == "NFC")
+    {
+        return flowcontrol_nfc;
+    }
+
+    return flowcontrol_undefined;
+};
+
+/**
+ * @brief All settings for power consumption mode
+ *
+ */
+enum PowerConsumptionMode
+{
+    powermode_undefined = -1,
+    powermode_run = 1,
+    powermode_wake_up = 2,
+};
+
+/**
+ * @brief All settings for LoRa air rate level (Speed)
+ *
+ */
+enum LoRaAirRateLevel
+{
+    LoRa_air_rate_level_undefined = -1,
+    LoRa_air_rate_level_268 = 1,
+    LoRa_air_rate_level_488 = 2,
+    LoRa_air_rate_level_537 = 3,
+    LoRa_air_rate_level_878 = 4,
+    LoRa_air_rate_level_977 = 5,
+    LoRa_air_rate_level_1758 = 6,
+    LoRa_air_rate_level_3125 = 7,
+    LoRa_air_rate_level_6250 = 8,
+    LoRa_air_rate_level_10937 = 9,
+    LoRa_air_rate_level_21875 = 10,
+};
+
+/**
+ * @brief Class used to store set and retrieve UART settings
+ *
+ */
+class USR_LG_206_P_UART_SETTINGS
+{
+public:
+    Baudrate buadrate = baudrate_115200;
+    char dataBits = 8;
+    char stopBits = 1;
+    Parity parity = parity_none;
+    Flowcontrol flowControl = flowcontrol_485;
+
+    String toString(void);
+    int fromString(String);
+};
+
+/**
+ * @brief Struct defined to store settings of the USR_LG206_P module
+ *
+ */
 typedef struct
 {
     int ATMode;
     int commandEchoFunction;
-    int nodeID;
+    String nodeID;
     String firmwareVersion;
-    int workMode;
+    WorkMode workMode;
     USR_LG_206_P_UART_SETTINGS *uart;
-    int powerMode;
-    int wakingUpInterval;
-    int loraAirRateLevel;
+    PowerConsumptionMode powerMode;
+    int wakeUpInterval;
+    LoRaAirRateLevel loraAirRateLevel;
     unsigned int destinationAddress;
     int channel;
     int forwardErrorCorrection;
     int transmittingPower;
-    char key[16]; // 16 bytes HEX format character string
+    int testInterval;
+    String key; // 16 bytes HEX format character string
 } USR_LG_206_P_SETTINGS_t;
 
+/**
+ * @brief Settings used by the manufacturer
+ *
+ */
 USR_LG_206_P_SETTINGS_t factory_settings = {
     .ATMode = false,
     .commandEchoFunction = false,
-    .nodeID = -1,
+    .nodeID = "",
     .firmwareVersion = "",
-    .workMode = WMODE_TRANS,
+    .workMode = work_mode_transparent,
     .uart = new USR_LG_206_P_UART_SETTINGS(),
-    .powerMode = POWERMODE_RUN,
-    .wakingUpInterval = 2000,
-    .loraAirRateLevel = LoRaAirRateLevel_21875,
+    .powerMode = powermode_run,
+    .wakeUpInterval = 2000,
+    .loraAirRateLevel = LoRa_air_rate_level_21875,
     .destinationAddress = 0,
     .channel = 65,
     .forwardErrorCorrection = false,
     .transmittingPower = 20,
-    // .key = {}
-};
+    .testInterval = false,
+    .key = "FFFFFFFF"};
 
+/**
+ * @brief Settings set to undefined to know which settings need to be retrieved from device
+ *
+ */
 USR_LG_206_P_SETTINGS_t undefined_settings = {
     .ATMode = false,
     .commandEchoFunction = SETTING_UNDEFINED,
-    .nodeID = SETTING_UNDEFINED,
+    .nodeID = "",
     .firmwareVersion = "",
-    .workMode = SETTING_UNDEFINED,
+    .workMode = work_mode_undefined,
     .uart = 0,
-    .powerMode = SETTING_UNDEFINED,
-    .wakingUpInterval = SETTING_UNDEFINED,
-    .loraAirRateLevel = SETTING_UNDEFINED,
+    .powerMode = powermode_undefined,
+    .wakeUpInterval = SETTING_UNDEFINED,
+    .loraAirRateLevel = LoRa_air_rate_level_undefined,
     .destinationAddress = 0,
     .channel = SETTING_UNDEFINED,
     .forwardErrorCorrection = SETTING_UNDEFINED,
     .transmittingPower = SETTING_UNDEFINED,
-    // .key[16] = {}
-};
+    .testInterval = SETTING_UNDEFINED,
+    .key = ""};
 
 /**
  * @brief Class used to connect and communicate to a LoRa module type USR_LG_206_P
@@ -139,13 +258,18 @@ public:
      */
     USR_LG_206_P(Stream *serial);
 
-    // TODO
-    int retrieve_settings(void);
+    /**
+     * @brief Set the settings of the LoRa module to factory settings
+     *
+     * @return int, true if succesfull and false if unsuccesfull
+     */
+    int factory_reset(void);
 
-    // TODO ADD reset to factory settings
+    // TODO
+    int set_settings(USR_LG_206_P_SETTINGS_t *settings);
 
     // TODO
-    //  int set_settings(USR_LG_206_P_SETTINGS* settings);
+    int get_settings(OUT USR_LG_206_P_SETTINGS_t &settings);
 
     /**
      * @brief Function to start the AT mode
@@ -154,45 +278,81 @@ public:
      */
     int begin_AT_mode(void);
 
-    /// @brief Function to end the AT mode and start transmission mode
-    /// @return true if succesfull and false if unsuccesfull
+    /**
+     * @brief Function to end the AT mode and start transmission mode
+     *
+     * @return true if succesfull and false if unsuccesfull
+     */
     int end_AT_mode(void);
 
-    /// @brief Function used to set the function echo boolean
-    /// @param isOn the value to which it is set
-    /// @return true of succesfull, false if unsuccesfull
+    /**
+     * @brief Function used to set the function echo boolean
+     *
+     * @param isOn the value to which it is set
+     * @return true if succesfull, false if unsuccesfull
+     */
     int set_echo(bool isOn);
 
-    /// @brief Function used to get the currect value of the echo function command on the LoRa module
-    /// @param isOn OUTPUT variable used to store the requested value
-    /// @return true of succesfull, false if unsuccesfull
+    /**
+     * @brief Function used to get the currect value of the echo function command on the LoRa module
+     *
+     * @param isOn OUTPUT variable used to store the requested value
+     * @return true if succesfull, false if unsuccesfull
+     */
     int get_echo(OUT bool &isOn);
 
-    /// @brief Function used to restart the LoRa module
-    /// @return true if succesfull
+    /**
+     * @brief Function used to restart the LoRa module
+     *
+     * @return true if succesfull
+     */
     int restart(void);
 
-    /// @brief Function used to set the current settings as new default
-    /// @return true of succesfull, false if unsuccesfull
+    /**
+     * @brief Function used to set the current settings as new default
+     *
+     * @return true if succesfull, false if unsuccesfull
+     */
     int save_as_default(void);
 
-    // TODO
+    /**
+     * @brief Function used to reset settings to default
+     *
+     * @return true if succesfull, false if unsuccesfull
+     */
     int reset_to_default(void);
 
-    // TODO
-    int get_node_id(void);
-    // TODO
-    int get_firmware_version(void);
+    /**
+     * @brief Get the node id
+     *
+     * @param node_id output parameter
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_node_id(OUT String &node_id);
 
-    /// @brief Function used to set the workmode
-    /// @param wmode workmode (WMODE_TRANS = 1, WMODE_FP = 2)
-    /// @return true of succesfull, false if unsuccesfull
-    int set_wmode(int wmode);
+    /**
+     * @brief Get the firmware version
+     *
+     * @param firmware_version output parameter
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_firmware_version(OUT String &firmware_version);
 
-    /// @brief Function used to get the work mode
-    /// @param wmode OUTPUT variable used to store the requested value
-    /// @return true of succesfull, false if unsuccesfull
-    int get_wmode(OUT int &wmode);
+    /**
+     * @brief Function used to set the workmode
+     *
+     * @param wmode WorkMode (work_mode_transparent or work_mode_fixed_point)
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int set_wmode(WorkMode wmode);
+
+    /**
+     * @brief Function used to get the work mode
+     *
+     * @param wmode OUTPUT variable used to store the requested value
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_wmode(OUT WorkMode &wmode);
 
     // TODO
     int set_uart(USR_LG_206_P_UART_SETTINGS *settings);
@@ -200,75 +360,181 @@ public:
     // TODO
     /// @brief Function used to get the uart settings
     /// @param settings OUTPUT variable used to store the requested value
-    /// @return true of succesfull, false if unsuccesfull
+    /// @return true if succesfull, false if unsuccesfull
     int get_uart(OUT USR_LG_206_P_UART_SETTINGS &settings);
 
-    // TODO
-    int set_power_consumption_mode(void);
-    // TODO
-    int get_power_consumption_mode(void);
-    // TODO
-    int set_waking_up_interval(void);
-    // TODO
-    int get_waking_up_interval(void);
+    /**
+     * @brief Set the power consumption mode
+     *
+     * @param powermode (POWERMODE_RUN, POWERMODE_WU)
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int set_power_consumption_mode(PowerConsumptionMode powermode);
 
-    /// @brief Function used to set the LoRa air rate level
-    /// @param speed value for air rate 1-10 as following values
-    /// 1: 268bps
-    /// 2: 488bps
-    /// 3: 537bps
-    /// 4: 878bps
-    /// 5: 977bps
-    /// 6: 1758bps
-    /// 7: 3125bps
-    /// 8: 6250bps
-    /// 9: 10937bps
-    /// 10: 21875bp
-    /// @return true of succesfull, false if unsuccesfull
-    int set_speed(int speed);
+    /**
+     * @brief Get the power consumption mode
+     *
+     * @param powermode (POWERMODE_RUN, POWERMODE_WU)
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_power_consumption_mode(OUT PowerConsumptionMode &powermode);
 
-    // TODO
-    int get_speed(void);
+    /**
+     * @brief Set the waking up interval
+     *
+     * @param wake_up_interval 500-4000 in ms
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int set_waking_up_interval(int wake_up_interval);
 
-    /// @brief Function used to set the destination address
-    /// @param address value between 0-65535
-    /// @return true of succesfull, false if unsuccesfull
+    /**
+     * @brief Get the waking up interval
+     *
+     * @param wake_up_interval in ms
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_waking_up_interval(OUT int &wake_up_interval);
+
+    /**
+     * @brief Function used to set the LoRa air rate level
+     *
+     * @param speed value for air rate 1-10 as following values
+     * 1: 268bps
+     * 2: 488bps
+     * 3: 537bps
+     * 4: 878bps
+     * 5: 977bps
+     * 6: 1758bps
+     * 7: 3125bps
+     * 8: 6250bps
+     * 9: 10937bps
+     * 10: 21875bps
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int set_speed(LoRaAirRateLevel speed);
+
+    /**
+     * @brief Function used to set the LoRa air rate level
+     *
+     * @param OUTPUT speed value for air rate 1-10 as following values
+     * 1: 268bps
+     * 2: 488bps
+     * 3: 537bps
+     * 4: 878bps
+     * 5: 977bps
+     * 6: 1758bps
+     * 7: 3125bps
+     * 8: 6250bps
+     * 9: 10937bps
+     * 10: 21875bps
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_speed(OUT LoRaAirRateLevel &speed);
+
+    /**
+     * @brief Function used to set the destination address
+     *
+     * @param address value between 0-65535 where 65535 a broadcast address is
+     * @return true if succesfull, false if unsuccesfull
+     */
     int set_address(int address);
 
-    // TODO
-    // int get_address(void);
+    /**
+     * @brief Function used to set the destination address
+     *
+     * @param OUTPUT address value between 0-65535 where 65535 a broadcast address is
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_address(OUT int &address);
 
-    /// @brief Function used to set the LoRa air rate level
-    /// @param channel value for channel is as following values in the following ranges
-    /// L: 0~127 Working frequency band=(398+ch)MHz (Default is 72, frequency band 470Mhz)
-    /// H: 0~127 Working frequency band=(803+ch)Mhz (Default is 65, frequency band 868Mhz)
-    /// @return true of succesfull, false if unsuccesfull
+    /**
+     * @brief Function used to get the LoRa air rate level
+     *
+     * @param channel value for channel is as following values in the following ranges
+     *  L: 0~127 Working frequency band=(398+ch)MHz (Default is 72, frequency band 470Mhz)
+     *  H: 0~127 Working frequency band=(803+ch)Mhz (Default is 65, frequency band 868Mhz)
+     * @return true if succesfull, false if unsuccesfull
+     */
     int set_channel(int channel);
 
-    // TODO
-    // int get_channel(void);
-    // TODO
-    // int set_forward_error_correction(void);
-    // TODO
-    // int get_forward_error_correction(void);
-    // TODO
-    // int set_power_transmission_mode(void);
-    // TODO
-    // int get_power_transmission_mode(void);
-    // TODO
-    // int set_transmission_interval(void);
-    // TODO
-    // int get_transmission_interval(void);
-    // TODO
-    // int set_key(void);
+    /**
+     * @brief Function used to get the LoRa air rate level
+     *
+     * @param OUTPUT channel value for channel is as following values in the following ranges
+     *  L: 0~127 Working frequency band=(398+ch)MHz (Default is 72, frequency band 470Mhz)
+     *  H: 0~127 Working frequency band=(803+ch)Mhz (Default is 65, frequency band 868Mhz)
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_channel(OUT int &channel);
 
-    /// @brief Function used to retrieve a message from the module
-    /// @return the data received
+    /**
+     * @brief Set the forward error correction on or off
+     *
+     * @param isOn true for forward error correction turned on and false for turned off
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int set_forward_error_correction(bool isOn);
+
+    /**
+     * @brief Get the forward error correction value
+     *
+     * @param isOn OUTPUT true for forward error correction turned on and false for turned off
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_forward_error_correction(OUT bool &isOn);
+
+    /**
+     * @brief Set the power transmission value
+     *
+     * @param power Amount of power in dBm (10~20)
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int set_power_transmission_value(int power);
+
+    /**
+     * @brief Set the power transmission value
+     *
+     * @param power OUTPUT Amount of power in dBm (10~20)
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_power_transmission_value(OUT int &power);
+
+    /**
+     * @brief Set the transmission interval of test data being sent
+     *
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int set_transmission_interval(int interval);
+
+    /**
+     * @brief Get the transmission interval of test data being sent
+     * // TODO implement a good way of receiving this data
+     *
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int get_transmission_interval(OUT int &interval);
+
+    /**
+     * @brief Set the key to encrypt the data transmission with
+     *
+     * @param key 16 bytes HEX format character string
+     * @return true if succesfull, false if unsuccesfull
+     */
+    int set_key(String key);
+
+    /**
+     * @brief Function used to retrieve a message from the module
+     *
+     * @return the data received
+     */
     String retrieve_message(void);
 
-    /// @brief Function used to send data
-    /// @param message data that needs to be send
-    /// @return amount of bytes written
+    /**
+     * @brief Function used to send data
+     *
+     * @param message data that needs to be send
+     * @return amount of bytes written
+     */
     int send_message(char *message);
 
 private:

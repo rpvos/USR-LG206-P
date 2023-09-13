@@ -13,6 +13,37 @@
 #include <Arduino.h>
 #include <ArduinoLog.h>
 
+String USR_LG_206_P_UART_SETTINGS::toString(void)
+{
+    return String(this->buadrate) + "," + String(this->dataBits) + "," + String(this->stopBits) + "," + ToString(this->parity) + "," + ToString(this->flowControl);
+};
+
+int USR_LG_206_P_UART_SETTINGS::fromString(String input)
+{
+    int index = input.indexOf(',');
+    String baudrate = input.substring(0, index);
+    input = input.substring(index);
+    this->buadrate = Baudrate(baudrate.toInt());
+
+    int index = input.indexOf(',');
+    String dataBits = input.substring(0, index);
+    input = input.substring(index);
+    this->dataBits = dataBits.toInt();
+
+    int index = input.indexOf(',');
+    String stopBits = input.substring(0, index);
+    input = input.substring(index);
+    this->stopBits = stopBits.toInt();
+
+    int index = input.indexOf(',');
+    String parity = input.substring(0, index);
+    input = input.substring(index);
+    this->parity = ParityFromString(input);
+
+    this->flowControl = FlowcontrolFromString(input);
+    return true;
+};
+
 USR_LG_206_P::USR_LG_206_P(Stream *serial)
 {
     this->serial = serial;
@@ -20,22 +51,21 @@ USR_LG_206_P::USR_LG_206_P(Stream *serial)
     this->settings = &settings;
 };
 
-int USR_LG_206_P::retrieve_settings(void)
+int USR_LG_206_P::factory_reset(void)
 {
-    USR_LG_206_P_SETTINGS_t settings;
-    settings.ATMode = true;
+    USR_LG_206_P_SETTINGS_t settings = factory_settings;
+    set_settings(&settings);
+}
 
-    bool isOn;
-    if (get_echo(isOn))
-    {
-        settings.commandEchoFunction = isOn;
-    }
-    // TODO add other settings
+int USR_LG_206_P::set_settings(USR_LG_206_P_SETTINGS_t *settings)
+{
+    // TODO add setter for every setting
+}
 
-    this->settings = &settings;
-
-    return true;
-};
+int USR_LG_206_P::get_settings(OUT USR_LG_206_P_SETTINGS_t &settings)
+{
+    // TODO use getter for every setting
+}
 
 int USR_LG_206_P::begin_AT_mode(void)
 {
@@ -76,7 +106,7 @@ int USR_LG_206_P::begin_AT_mode(void)
 int USR_LG_206_P::end_AT_mode(void)
 {
     // Check if LoRa module was already out of AT mode
-    if (!settings->ATMode)
+    if (!(settings->ATMode))
     {
         return true;
     }
@@ -115,9 +145,10 @@ int USR_LG_206_P::set_echo(bool isOn)
     {
         // Set the setting to the set value
         settings->commandEchoFunction = isOn;
+        return true;
     }
 
-    return received_data;
+    return false;
 };
 
 int USR_LG_206_P::get_echo(OUT bool &isOn)
@@ -246,22 +277,54 @@ int USR_LG_206_P::reset_to_default(void)
     return true;
 };
 
-int USR_LG_206_P::get_node_id(void){
+int USR_LG_206_P::get_node_id(OUT String &node_id)
+{
+    if (settings->nodeID != "")
+    {
+        node_id = settings->nodeID;
+        return true;
+    }
 
+    String command = "+NID";
+    String value = get_command(command);
+
+    if (value)
+    {
+        node_id = value;
+        return true;
+    }
+
+    return false;
 };
 
-int USR_LG_206_P::get_firmware_version(void){
+int USR_LG_206_P::get_firmware_version(OUT String &firmware_version)
+{
+    if (settings->firmwareVersion != "")
+    {
+        firmware_version = settings->firmwareVersion;
+        return true;
+    }
 
+    String command = "+VER";
+    String value = get_command(command);
+
+    if (value)
+    {
+        firmware_version = value;
+        return true;
+    }
+
+    return false;
 };
 
-int USR_LG_206_P::set_wmode(int wmode = WMODE_TRANS)
+int USR_LG_206_P::set_wmode(WorkMode wmode = work_mode_transparent)
 {
     String command = "+WMODE=";
-    if (wmode == WMODE_TRANS)
+    if (wmode == work_mode_transparent)
     {
         command += "TRANS";
     }
-    if (wmode == WMODE_FP)
+    if (wmode == work_mode_fixed_point)
     {
         command += "FP";
     }
@@ -276,18 +339,19 @@ int USR_LG_206_P::set_wmode(int wmode = WMODE_TRANS)
     // If the set command was done succesfull
     if (received_data)
     {
-        // Set the setting to the set value
-        settings->workMode = received_data;
+        settings->workMode = wmode;
+        return true;
     }
 
-    return received_data;
+    return false;
 };
 
-int USR_LG_206_P::get_wmode(OUT int &wmode)
+int USR_LG_206_P::get_wmode(OUT WorkMode &wmode)
 {
-    if (settings->workMode != SETTING_UNDEFINED)
+    if (settings->workMode != work_mode_undefined)
     {
-        return settings->workMode;
+        wmode = settings->workMode;
+        return true;
     }
 
     String command = "+WMODE";
@@ -295,107 +359,460 @@ int USR_LG_206_P::get_wmode(OUT int &wmode)
 
     if (value == "TRANS")
     {
-        settings->workMode = WMODE_TRANS;
-        wmode = WMODE_TRANS;
+        settings->workMode = work_mode_transparent;
+        wmode = work_mode_transparent;
         return true;
     }
     else if (value == "FP")
     {
-        settings->workMode = WMODE_FP;
-        wmode = WMODE_TRANS;
+        settings->workMode = work_mode_fixed_point;
+        wmode = work_mode_fixed_point;
         return true;
     }
 
     return false;
 };
 
-int USR_LG_206_P::set_uart(USR_LG_206_P_UART_SETTINGS *settings){
+int USR_LG_206_P::set_uart(USR_LG_206_P_UART_SETTINGS *uart_settings)
+{
+    if (uart_settings == 0)
+    {
+        return false;
+    }
 
+    String command = "+UART=";
+    command += uart_settings->toString();
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->uart = uart_settings;
+        return true;
+    }
+
+    return false;
 };
 
 int USR_LG_206_P::get_uart(OUT USR_LG_206_P_UART_SETTINGS &settings){
 
 };
 
-int USR_LG_206_P::set_power_consumption_mode(void){};
-
-int USR_LG_206_P::get_power_consumption_mode(void){};
-
-int USR_LG_206_P::set_waking_up_interval(void){};
-int USR_LG_206_P::get_waking_up_interval(void){};
-
-int USR_LG_206_P::set_speed(int speed = 10)
+int USR_LG_206_P::set_power_consumption_mode(PowerConsumptionMode powermode = powermode_run)
 {
-    if (1 <= speed && speed <= 10)
+    String command = "+PMODE=";
+    if (powermode == powermode_run)
     {
-        String command = "+SPD=" + speed;
-
-        int received_data = set_command(command);
-
-        // If the set command was done succesfull
-        if (received_data)
-        {
-            // Set the setting to the set value
-            settings->loraAirRateLevel = received_data;
-        }
-
-        return received_data;
+        command += "RUN";
+    }
+    if (powermode == powermode_wake_up)
+    {
+        command += "WU";
     }
     else
     {
-        log_warning("0-10", "" + speed);
+        Log.warningln("Powermode is not defined (\"%d\")", powermode);
+        return false;
+    }
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->powerMode = powermode;
+        return true;
     }
 
     return false;
 };
 
-int USR_LG_206_P::get_speed(void){};
+int USR_LG_206_P::get_power_consumption_mode(OUT PowerConsumptionMode &powermode)
+{
+    if (settings->powerMode != powermode_undefined)
+    {
+        powermode = settings->powerMode;
+        return true;
+    }
+
+    String command = "+PMODE";
+    String value = get_command(command);
+
+    if (value == "RUN")
+    {
+        settings->powerMode = powermode_run;
+        powermode = powermode_run;
+        return true;
+    }
+    else if (value == "WU")
+    {
+        settings->powerMode = powermode_wake_up;
+        powermode = powermode_wake_up;
+        return true;
+    }
+
+    return false;
+};
+
+int USR_LG_206_P::set_waking_up_interval(int wake_up_interval = 2000)
+{
+    String command = "+WTM=";
+    if (500 <= wake_up_interval && wake_up_interval <= 4000)
+    {
+        command += wake_up_interval;
+    }
+    else
+    {
+        Log.warningln("Wake up interval is out of bounds (\"%d\")", wake_up_interval);
+        return false;
+    }
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->wakeUpInterval = wake_up_interval;
+        return true;
+    }
+
+    return false;
+};
+int USR_LG_206_P::get_waking_up_interval(OUT int &wake_up_interval)
+{
+    if (settings->wakeUpInterval != SETTING_UNDEFINED)
+    {
+        wake_up_interval = settings->wakeUpInterval;
+        return true;
+    }
+
+    String command = "+WTM";
+    String value = get_command(command);
+
+    if (value)
+    {
+        settings->wakeUpInterval = value.toInt();
+        wake_up_interval = value.toInt();
+        return true;
+    }
+
+    return false;
+};
+
+int USR_LG_206_P::set_speed(LoRaAirRateLevel speed = LoRa_air_rate_level_21875)
+{
+    String command = "+SPD=";
+    if (1 <= speed && speed <= 10)
+    {
+        command += speed;
+    }
+    else
+    {
+        Log.warningln("LoRa air rate is out of bounds (\"%d\")", speed);
+        return false;
+    }
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->loraAirRateLevel = speed;
+        return true;
+    }
+
+    return false;
+};
+
+int USR_LG_206_P::get_speed(OUT LoRaAirRateLevel &speed)
+{
+    if (settings->loraAirRateLevel != LoRa_air_rate_level_undefined)
+    {
+        speed = settings->loraAirRateLevel;
+        return true;
+    }
+
+    String command = "+SPD";
+    String value = get_command(command);
+
+    if (value)
+    {
+        settings->loraAirRateLevel = LoRaAirRateLevel(value.toInt());
+        speed = LoRaAirRateLevel(value.toInt());
+        return true;
+    }
+
+    return false;
+};
 
 int USR_LG_206_P::set_address(int address = 0)
 {
-    if (0 <= address && address <= 65535)
+    String command = "+ADDR=";
+    if (1 <= address && address <= 65535)
     {
-        String command = "+ADDR=" + address;
-
-        int received_data = set_command(command);
-
-        // If the set command was done succesfull
-        if (received_data)
-        {
-            // Set the setting to the set value
-            settings->destinationAddress = received_data;
-        }
-
-        return received_data;
+        command += address;
     }
     else
     {
-        log_warning("0-65535", "" + address);
+        Log.warningln("Address is out of bounds (\"%d\")", address);
+        return false;
+    }
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->destinationAddress = address;
+        return true;
     }
 
     return false;
 };
 
+int USR_LG_206_P::get_address(OUT int &address)
+{
+    if (settings->destinationAddress != SETTING_UNDEFINED)
+    {
+        address = settings->destinationAddress;
+        return true;
+    }
+
+    String command = "+ADDR";
+    String value = get_command(command);
+
+    if (value)
+    {
+        settings->destinationAddress = value.toInt();
+        address = value.toInt();
+        return true;
+    }
+
+    return false;
+}
+
 int USR_LG_206_P::set_channel(int channel = 65)
 {
+    String command = "+CH=";
     if (0 <= channel && channel <= 127)
     {
-        String command = "+CH=" + channel;
-
-        int received_data = set_command(command);
-
-        // If the set command was done succesfull
-        if (received_data)
-        {
-            // Set the setting to the set value
-            settings->channel = received_data;
-        }
-
-        return received_data;
+        command += channel;
     }
     else
     {
-        log_warning("0-127", "" + channel);
+        Log.warningln("Channel is out of bounds (\"%d\")", channel);
+        return false;
+    }
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->channel = channel;
+        return true;
+    }
+
+    return false;
+};
+
+int USR_LG_206_P::get_channel(OUT int &channel)
+{
+    if (settings->channel != SETTING_UNDEFINED)
+    {
+        channel = settings->channel;
+        return true;
+    }
+
+    String command = "+CH";
+    String value = get_command(command);
+
+    if (value)
+    {
+        settings->channel = value.toInt();
+        channel = value.toInt();
+        return true;
+    }
+
+    return false;
+};
+
+int USR_LG_206_P::set_forward_error_correction(bool isOn = false)
+{
+    String command = "+FEC=";
+    if (isOn)
+    {
+        command += "ON";
+    }
+    else
+    {
+        command += "OFF";
+    }
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->forwardErrorCorrection = isOn;
+        return true;
+    }
+
+    return false;
+}
+
+int USR_LG_206_P::get_forward_error_correction(OUT bool &isOn)
+{
+
+    if (settings->forwardErrorCorrection != SETTING_UNDEFINED)
+    {
+        isOn = settings->forwardErrorCorrection;
+        return true;
+    }
+
+    String command = "+FEC";
+    String value = get_command(command);
+
+    if (value == "ON")
+    {
+        settings->forwardErrorCorrection = true;
+        isOn = true;
+        return true;
+    }
+    else if (value == "OFF")
+    {
+        settings->forwardErrorCorrection = false;
+        isOn = false;
+        return true;
+    }
+
+    return false;
+}
+
+int USR_LG_206_P::set_power_transmission_value(int power = 20)
+{
+    String command = "+PWR=";
+    if (10 <= power && power <= 20)
+    {
+        command += power;
+    }
+    else
+    {
+        Log.warningln("power is out of bounds (\"%d\")", power);
+        return false;
+    }
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->transmittingPower = power;
+        return true;
+    }
+
+    return false;
+};
+
+int USR_LG_206_P::get_power_transmission_value(OUT int &power)
+{
+    if (settings->transmittingPower != SETTING_UNDEFINED)
+    {
+        power = settings->transmittingPower;
+        return true;
+    }
+
+    String command = "+PWR";
+    String value = get_command(command);
+
+    if (value)
+    {
+        settings->transmittingPower = value.toInt();
+        power = value.toInt();
+        return true;
+    }
+
+    return false;
+};
+
+int USR_LG_206_P::set_transmission_interval(int interval = 2000)
+{
+    String command = "+SQT=";
+    if ((100 <= interval && interval <= 6000) || false)
+    {
+        command += interval;
+    }
+    else
+    {
+        Log.warningln("interval is out of bounds (\"%d\")", interval);
+        return false;
+    }
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->testInterval = interval;
+        return true;
+    }
+
+    return false;
+};
+
+int USR_LG_206_P::get_transmission_interval(OUT int &interval)
+{
+    if (settings->testInterval != SETTING_UNDEFINED)
+    {
+        interval = settings->testInterval;
+        return true;
+    }
+
+    String command = "+SQT";
+    // TODO probably other way of receiving data then normal
+    String value = get_command(command);
+
+    if (value)
+    {
+        settings->testInterval = value.toInt();
+        interval = value.toInt();
+        return true;
+    }
+
+    return false;
+};
+
+int USR_LG_206_P::set_key(String key = "FFFFFFFF")
+{
+    String command = "+KEY=";
+    if (key.length() == 8)
+    {
+        command += key;
+    }
+    else
+    {
+        Log.warningln("Key length is not correct (\"%s\")", key);
+        return false;
+    }
+
+    int received_data = set_command(command);
+
+    // If the set command was done succesfull
+    if (received_data)
+    {
+        // Set the setting to the set value
+        settings->key = key;
+        return true;
     }
 
     return false;
