@@ -12,7 +12,10 @@
 #include "USR_LG206_P.h"
 #include "USR_LG206_P_settings.h"
 #include <Arduino.h>
+
+#ifdef LOGGER_
 #include <ArduinoLog.h>
+#endif
 
 USR_LG_206_P::USR_LG_206_P(Stream *serial)
 {
@@ -302,7 +305,9 @@ int USR_LG_206_P::set_wmode(WorkMode wmode = work_mode_transparent)
     }
     else
     {
+#ifdef LOGGER_
         Log.warningln("Wmode is not defined (\"%d\")", wmode);
+#endif
         return false;
     }
 
@@ -400,7 +405,9 @@ int USR_LG_206_P::set_power_consumption_mode(PowerConsumptionMode powermode = po
     }
     else
     {
+#ifdef LOGGER_
         Log.warningln("Powermode is not defined (\"%d\")", powermode);
+#endif
         return false;
     }
 
@@ -453,7 +460,9 @@ int USR_LG_206_P::set_waking_up_interval(int wake_up_interval = 2000)
     }
     else
     {
+#ifdef LOGGER_
         Log.warningln("Wake up interval is out of bounds (\"%d\")", wake_up_interval);
+#endif
         return false;
     }
 
@@ -499,7 +508,9 @@ int USR_LG_206_P::set_speed(LoRaAirRateLevel speed = LoRa_air_rate_level_21875)
     }
     else
     {
+#ifdef LOGGER_
         Log.warningln("LoRa air rate is out of bounds (\"%d\")", speed);
+#endif
         return false;
     }
 
@@ -546,7 +557,9 @@ int USR_LG_206_P::set_address(int address = 0)
     }
     else
     {
+#ifdef LOGGER_
         Log.warningln("Address is out of bounds (\"%d\")", address);
+#endif
         return false;
     }
 
@@ -595,7 +608,9 @@ int USR_LG_206_P::set_channel(int channel = 65)
     }
     else
     {
+#ifdef LOGGER_
         Log.warningln("Channel is out of bounds (\"%d\")", channel);
+#endif
         return false;
     }
 
@@ -695,7 +710,9 @@ int USR_LG_206_P::set_power_transmission_value(int power = 20)
     }
     else
     {
+#ifdef LOGGER_
         Log.warningln("power is out of bounds (\"%d\")", power);
+#endif
         return false;
     }
 
@@ -742,7 +759,9 @@ int USR_LG_206_P::set_transmission_interval(int interval = 2000)
     }
     else
     {
+#ifdef LOGGER_
         Log.warningln("interval is out of bounds (\"%d\")", interval);
+#endif
         return false;
     }
 
@@ -790,7 +809,9 @@ int USR_LG_206_P::set_key(String key = "FFFFFFFF")
     }
     else
     {
+#ifdef LOGGER_
         Log.warningln("Key length is not correct (\"%s\")", key);
+#endif
         return false;
     }
 
@@ -882,5 +903,7 @@ String USR_LG_206_P::get_command(String command)
 
 void USR_LG_206_P::log_warning(String expected_data, String actual_data)
 {
+#ifdef LOGGER_
     Log.warningln("Received received_data is not \"%s\" but \"%s\"", expected_data.c_str(), actual_data.c_str());
+#endif
 };
