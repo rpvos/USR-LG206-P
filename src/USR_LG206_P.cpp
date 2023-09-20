@@ -12,37 +12,60 @@
 #include "USR_LG206_P.h"
 #include "USR_LG206_P_settings.h"
 #include <Arduino.h>
+#include <MAX485TTL.h>
 
+// #define LOGGER_
 #ifdef LOGGER_
 #include <ArduinoLog.h>
 #endif
 
-USR_LG_206_P::USR_LG_206_P(Stream *serial)
+LoRa::LoRa(RS485 *serial)
 {
     this->serial = serial;
-    USR_LG_206_P_SETTINGS settings = USR_LG_206_P_SETTINGS(false);
-    this->settings = &settings;
+    this->settings = new LoRaSettings(false);
 };
 
-int USR_LG_206_P::factory_reset(void)
+LoRa::~LoRa(void)
 {
-    USR_LG_206_P_SETTINGS settings = USR_LG_206_P_SETTINGS(true);
+    this->serial = nullptr;
+    delete this->settings;
+};
+
+String LoRa::SendCommand(String command)
+{
+    serial->print(command);
+    serial->flush();
+
+    serial->WaitForInput();
+    if (serial->available())
+    {
+        return serial->readString();
+    }
+
+    return "";
+}
+
+int LoRa::factory_reset(void)
+{
+    LoRaSettings settings = LoRaSettings(true);
     return set_settings(&settings);
 }
 
-int USR_LG_206_P::set_settings(USR_LG_206_P_SETTINGS *settings)
+int LoRa::set_settings(LoRaSettings *settings)
 {
+    delete this->settings;
+    this->settings = settings;
     // TODO add setter for every setting
     return false;
 }
 
-int USR_LG_206_P::get_settings(OUT USR_LG_206_P_SETTINGS &settings)
+int LoRa::get_settings(OUT LoRaSettings &settings)
 {
     // TODO use getter for every setting
     return false;
 }
 
-int USR_LG_206_P::begin_AT_mode(void)
+int LoRa::begin_AT_mode(void)
 {
     // Check if the LoRa module is already in AT mode
     if (settings->ATMode)
@@ -52,9 +75,7 @@ int USR_LG_206_P::begin_AT_mode(void)
 
     String received_data = "";
     String sent_data = "+++";
-    serial->println(sent_data);
-
-    received_data = serial->readString();
+    received_data = SendCommand(sent_data);
 
     String expected_data = "a";
     if (received_data != expected_data)
@@ -65,8 +86,8 @@ int USR_LG_206_P::begin_AT_mode(void)
     }
 
     sent_data = "a";
-    serial->println(sent_data);
-    received_data = serial->readString();
+    received_data = SendCommand(sent_data);
+
     expected_data = "+OK";
     if (received_data != expected_data)
     {
@@ -78,7 +99,7 @@ int USR_LG_206_P::begin_AT_mode(void)
     return true;
 };
 
-int USR_LG_206_P::end_AT_mode(void)
+int LoRa::end_AT_mode(void)
 {
     // Check if LoRa module was already out of AT mode
     if (!(settings->ATMode))
@@ -86,22 +107,11 @@ int USR_LG_206_P::end_AT_mode(void)
         return true;
     }
 
-    serial->println("AT+ENTM");
-    String received_data = serial->readString();
-    String expected_data = "OK";
-    if (received_data != expected_data)
-    {
-        log_warning(expected_data, received_data);
-        return false;
-    }
-    else
-    {
-        settings->ATMode = false;
-        return true;
-    }
+    String command = "+ENTM";
+    return SendSetCommand(command);
 };
 
-int USR_LG_206_P::set_echo(bool isOn)
+int LoRa::set_echo(bool isOn)
 {
     String command = "+E=";
     if (isOn)
@@ -113,7 +123,7 @@ int USR_LG_206_P::set_echo(bool isOn)
         command += "OFF";
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -126,7 +136,7 @@ int USR_LG_206_P::set_echo(bool isOn)
     return false;
 };
 
-int USR_LG_206_P::get_echo(OUT bool &isOn)
+int LoRa::get_echo(OUT bool &isOn)
 {
     if (settings->commandEchoFunction != SETTING_UNDEFINED)
     {
@@ -137,6 +147,7 @@ int USR_LG_206_P::get_echo(OUT bool &isOn)
 
     serial->println("AT" + command);
     String expected_data = command;
+    serial->WaitForInput();
     String received_data = serial->readString();
 
     if (received_data != expected_data)
@@ -145,6 +156,7 @@ int USR_LG_206_P::get_echo(OUT bool &isOn)
         return false;
     }
 
+    serial->WaitForInput();
     received_data = serial->readString();
 
     expected_data = "OK=";
@@ -174,59 +186,21 @@ int USR_LG_206_P::get_echo(OUT bool &isOn)
     return false;
 };
 
-int USR_LG_206_P::restart(void)
+int LoRa::restart(void)
 {
-    String command = "AT+Z";
-    serial->println(command);
-    String received_data = serial->readString();
-    String expected_data = command;
+    String command = "+Z\n";
 
-    if (received_data != expected_data)
-    {
-        log_warning(expected_data, received_data);
-        return false;
-    }
-
-    received_data = serial->readString();
-
-    expected_data = "OK";
-
-    if (received_data != expected_data)
-    {
-        log_warning(expected_data, received_data);
-        return false;
-    }
-
-    return true;
+    return SendSetCommand(command);
 };
 
-int USR_LG_206_P::save_as_default(void)
+int LoRa::save_as_default(void)
 {
-    String command = "AT+CFGTF";
-    serial->println(command);
-    String received_data = serial->readString();
-    String expected_data = command;
-
-    if (received_data != expected_data)
-    {
-        log_warning(expected_data, received_data);
-        return false;
-    }
-
-    received_data = serial->readString();
-
-    expected_data = "+CFGTF:SAVED";
-
-    if (received_data != expected_data)
-    {
-        log_warning(expected_data, received_data);
-        return false;
-    }
-
-    return true;
+    String command = "+CFGTF";
+    String succes_message = "+CFGTF:SAVED";
+    return SendSetCommand(command, succes_message);
 };
 
-int USR_LG_206_P::reset_to_default(void)
+int LoRa::reset_to_default(void)
 {
     String command = "AT+RELD";
     serial->println(command);
@@ -252,7 +226,7 @@ int USR_LG_206_P::reset_to_default(void)
     return true;
 };
 
-int USR_LG_206_P::get_node_id(OUT String &node_id)
+int LoRa::get_node_id(OUT String &node_id)
 {
     if (settings->nodeID != "")
     {
@@ -272,7 +246,7 @@ int USR_LG_206_P::get_node_id(OUT String &node_id)
     return false;
 };
 
-int USR_LG_206_P::get_firmware_version(OUT String &firmware_version)
+int LoRa::get_firmware_version(OUT String &firmware_version)
 {
     if (settings->firmwareVersion != "")
     {
@@ -292,7 +266,7 @@ int USR_LG_206_P::get_firmware_version(OUT String &firmware_version)
     return false;
 };
 
-int USR_LG_206_P::set_wmode(WorkMode wmode = work_mode_transparent)
+int LoRa::set_wmode(WorkMode wmode = work_mode_transparent)
 {
     String command = "+WMODE=";
     if (wmode == work_mode_transparent)
@@ -311,7 +285,7 @@ int USR_LG_206_P::set_wmode(WorkMode wmode = work_mode_transparent)
         return false;
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -323,7 +297,7 @@ int USR_LG_206_P::set_wmode(WorkMode wmode = work_mode_transparent)
     return false;
 };
 
-int USR_LG_206_P::get_wmode(OUT WorkMode &wmode)
+int LoRa::get_wmode(OUT WorkMode &wmode)
 {
     if (settings->workMode != work_mode_undefined)
     {
@@ -350,7 +324,7 @@ int USR_LG_206_P::get_wmode(OUT WorkMode &wmode)
     return false;
 };
 
-int USR_LG_206_P::set_uart(USR_LG_206_P_UART_SETTINGS *uart_settings)
+int LoRa::set_uart(LoRaUartSettings *uart_settings)
 {
     if (uart_settings == 0)
     {
@@ -360,7 +334,7 @@ int USR_LG_206_P::set_uart(USR_LG_206_P_UART_SETTINGS *uart_settings)
     String command = "+UART=";
     command += uart_settings->toString();
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -373,7 +347,7 @@ int USR_LG_206_P::set_uart(USR_LG_206_P_UART_SETTINGS *uart_settings)
     return false;
 };
 
-int USR_LG_206_P::get_uart(OUT USR_LG_206_P_UART_SETTINGS &uart_settings)
+int LoRa::get_uart(OUT LoRaUartSettings &uart_settings)
 {
     if (settings->get_uart() != 0)
     {
@@ -392,7 +366,7 @@ int USR_LG_206_P::get_uart(OUT USR_LG_206_P_UART_SETTINGS &uart_settings)
     return false;
 };
 
-int USR_LG_206_P::set_power_consumption_mode(PowerConsumptionMode powermode = powermode_run)
+int LoRa::set_power_consumption_mode(PowerConsumptionMode powermode = powermode_run)
 {
     String command = "+PMODE=";
     if (powermode == powermode_run)
@@ -411,7 +385,7 @@ int USR_LG_206_P::set_power_consumption_mode(PowerConsumptionMode powermode = po
         return false;
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -424,7 +398,7 @@ int USR_LG_206_P::set_power_consumption_mode(PowerConsumptionMode powermode = po
     return false;
 };
 
-int USR_LG_206_P::get_power_consumption_mode(OUT PowerConsumptionMode &powermode)
+int LoRa::get_power_consumption_mode(OUT PowerConsumptionMode &powermode)
 {
     if (settings->powerMode != powermode_undefined)
     {
@@ -451,7 +425,7 @@ int USR_LG_206_P::get_power_consumption_mode(OUT PowerConsumptionMode &powermode
     return false;
 };
 
-int USR_LG_206_P::set_waking_up_interval(int wake_up_interval = 2000)
+int LoRa::set_waking_up_interval(int wake_up_interval = 2000)
 {
     String command = "+WTM=";
     if (500 <= wake_up_interval && wake_up_interval <= 4000)
@@ -466,7 +440,7 @@ int USR_LG_206_P::set_waking_up_interval(int wake_up_interval = 2000)
         return false;
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -478,7 +452,7 @@ int USR_LG_206_P::set_waking_up_interval(int wake_up_interval = 2000)
 
     return false;
 };
-int USR_LG_206_P::get_waking_up_interval(OUT int &wake_up_interval)
+int LoRa::get_waking_up_interval(OUT int &wake_up_interval)
 {
     if (settings->wakeUpInterval != SETTING_UNDEFINED)
     {
@@ -499,7 +473,7 @@ int USR_LG_206_P::get_waking_up_interval(OUT int &wake_up_interval)
     return false;
 };
 
-int USR_LG_206_P::set_speed(LoRaAirRateLevel speed = LoRa_air_rate_level_21875)
+int LoRa::set_speed(LoRaAirRateLevel speed = LoRa_air_rate_level_21875)
 {
     String command = "+SPD=";
     if (1 <= speed && speed <= 10)
@@ -508,13 +482,10 @@ int USR_LG_206_P::set_speed(LoRaAirRateLevel speed = LoRa_air_rate_level_21875)
     }
     else
     {
-#ifdef LOGGER_
-        Log.warningln("LoRa air rate is out of bounds (\"%d\")", speed);
-#endif
-        return false;
+        return -1;
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -527,7 +498,7 @@ int USR_LG_206_P::set_speed(LoRaAirRateLevel speed = LoRa_air_rate_level_21875)
     return false;
 };
 
-int USR_LG_206_P::get_speed(OUT LoRaAirRateLevel &speed)
+int LoRa::get_speed(OUT LoRaAirRateLevel &speed)
 {
     if (settings->loraAirRateLevel != LoRa_air_rate_level_undefined)
     {
@@ -548,7 +519,7 @@ int USR_LG_206_P::get_speed(OUT LoRaAirRateLevel &speed)
     return false;
 };
 
-int USR_LG_206_P::set_address(int address = 0)
+int LoRa::set_address(int address = 0)
 {
     String command = "+ADDR=";
     if (1 <= address && address <= 65535)
@@ -557,13 +528,10 @@ int USR_LG_206_P::set_address(int address = 0)
     }
     else
     {
-#ifdef LOGGER_
-        Log.warningln("Address is out of bounds (\"%d\")", address);
-#endif
-        return false;
+        return -1;
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -577,7 +545,7 @@ int USR_LG_206_P::set_address(int address = 0)
     return false;
 };
 
-int USR_LG_206_P::get_address(OUT int &address)
+int LoRa::get_address(OUT int &address)
 {
     if (settings->destinationAddressIsSet)
     {
@@ -599,7 +567,7 @@ int USR_LG_206_P::get_address(OUT int &address)
     return false;
 }
 
-int USR_LG_206_P::set_channel(int channel = 65)
+int LoRa::set_channel(int channel = 65)
 {
     String command = "+CH=";
     if (0 <= channel && channel <= 127)
@@ -614,7 +582,7 @@ int USR_LG_206_P::set_channel(int channel = 65)
         return false;
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -627,7 +595,7 @@ int USR_LG_206_P::set_channel(int channel = 65)
     return false;
 };
 
-int USR_LG_206_P::get_channel(OUT int &channel)
+int LoRa::get_channel(OUT int &channel)
 {
     if (settings->channel != SETTING_UNDEFINED)
     {
@@ -648,7 +616,7 @@ int USR_LG_206_P::get_channel(OUT int &channel)
     return false;
 };
 
-int USR_LG_206_P::set_forward_error_correction(bool isOn = false)
+int LoRa::set_forward_error_correction(bool isOn = false)
 {
     String command = "+FEC=";
     if (isOn)
@@ -660,7 +628,7 @@ int USR_LG_206_P::set_forward_error_correction(bool isOn = false)
         command += "OFF";
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -673,7 +641,7 @@ int USR_LG_206_P::set_forward_error_correction(bool isOn = false)
     return false;
 }
 
-int USR_LG_206_P::get_forward_error_correction(OUT bool &isOn)
+int LoRa::get_forward_error_correction(OUT bool &isOn)
 {
 
     if (settings->forwardErrorCorrection != SETTING_UNDEFINED)
@@ -701,7 +669,7 @@ int USR_LG_206_P::get_forward_error_correction(OUT bool &isOn)
     return false;
 }
 
-int USR_LG_206_P::set_power_transmission_value(int power = 20)
+int LoRa::set_power_transmission_value(int power = 20)
 {
     String command = "+PWR=";
     if (10 <= power && power <= 20)
@@ -716,7 +684,7 @@ int USR_LG_206_P::set_power_transmission_value(int power = 20)
         return false;
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -729,7 +697,7 @@ int USR_LG_206_P::set_power_transmission_value(int power = 20)
     return false;
 };
 
-int USR_LG_206_P::get_power_transmission_value(OUT int &power)
+int LoRa::get_power_transmission_value(OUT int &power)
 {
     if (settings->transmittingPower != SETTING_UNDEFINED)
     {
@@ -750,7 +718,7 @@ int USR_LG_206_P::get_power_transmission_value(OUT int &power)
     return false;
 };
 
-int USR_LG_206_P::set_transmission_interval(int interval = 2000)
+int LoRa::set_transmission_interval(int interval = 2000)
 {
     String command = "+SQT=";
     if ((100 <= interval && interval <= 6000) || false)
@@ -765,7 +733,7 @@ int USR_LG_206_P::set_transmission_interval(int interval = 2000)
         return false;
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -778,7 +746,7 @@ int USR_LG_206_P::set_transmission_interval(int interval = 2000)
     return false;
 };
 
-int USR_LG_206_P::get_transmission_interval(OUT int &interval)
+int LoRa::get_transmission_interval(OUT int &interval)
 {
     if (settings->testInterval != SETTING_UNDEFINED)
     {
@@ -800,7 +768,7 @@ int USR_LG_206_P::get_transmission_interval(OUT int &interval)
     return false;
 };
 
-int USR_LG_206_P::set_key(String key = "FFFFFFFF")
+int LoRa::set_key(String key = "FFFFFFFF")
 {
     String command = "+KEY=";
     if (key.length() == 8)
@@ -815,7 +783,7 @@ int USR_LG_206_P::set_key(String key = "FFFFFFFF")
         return false;
     }
 
-    int received_data = set_command(command);
+    int received_data = SendSetCommand(command);
 
     // If the set command was done succesfull
     if (received_data)
@@ -828,7 +796,7 @@ int USR_LG_206_P::set_key(String key = "FFFFFFFF")
     return false;
 };
 
-String USR_LG_206_P::retrieve_message(void)
+String LoRa::retrieve_message(void)
 {
     if (serial->available())
     {
@@ -838,7 +806,7 @@ String USR_LG_206_P::retrieve_message(void)
     return "";
 };
 
-int USR_LG_206_P::send_message(char *message)
+int LoRa::send_message(char *message)
 {
 
     int amountOfBytesWritten = serial->println(message);
@@ -850,29 +818,32 @@ int USR_LG_206_P::send_message(char *message)
     return false;
 };
 
-int USR_LG_206_P::set_command(String command)
+int LoRa::SendSetCommand(String command, String succesfull_response)
 {
-    serial->println("AT" + command);
+    command = "AT" + command + "\n";
     String expected_data = command;
-    String received_data = serial->readString();
-    if (received_data != expected_data)
+    String received_data = SendCommand(command);
+
+    // If echo is enabled check for the repeated command
+    if (this->settings->commandEchoFunction)
     {
-        log_warning(expected_data, received_data);
-        return false;
+        String returned_command = received_data.substring(0, command.length());
+        if (returned_command != command)
+        {
+            return false;
+        }
     }
 
-    received_data = serial->readString();
-    expected_data = "OK";
-    if (received_data != expected_data)
+    int index = received_data.indexOf(succesfull_response);
+    if (index == -1)
     {
-        log_warning(expected_data, received_data);
         return false;
     }
 
     return true;
 };
 
-String USR_LG_206_P::get_command(String command)
+String LoRa::get_command(String command)
 {
     serial->println("AT" + command);
     String expected_data = command;
@@ -901,9 +872,9 @@ String USR_LG_206_P::get_command(String command)
     return value;
 };
 
-void USR_LG_206_P::log_warning(String expected_data, String actual_data)
+void LoRa::log_warning(String expected_data, String actual_data)
 {
 #ifdef LOGGER_
-    Log.warningln("Received received_data is not \"%s\" but \"%s\"", expected_data.c_str(), actual_data.c_str());
+    Serial.print("Received received_data is not\n" + expected_data + "but\n" + actual_data);
 #endif
 };

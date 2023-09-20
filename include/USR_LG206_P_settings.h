@@ -148,7 +148,7 @@ enum LoRaAirRateLevel
  * @brief Class used to store set and retrieve UART settings
  *
  */
-class USR_LG_206_P_UART_SETTINGS
+class LoRaUartSettings
 {
 public:
     Baudrate buadrate;
@@ -157,16 +157,19 @@ public:
     Parity parity;
     Flowcontrol flowControl;
 
-    USR_LG_206_P_UART_SETTINGS(bool usingFactorySettings);
+    LoRaUartSettings(bool usingFactorySettings);
     String toString(void);
     int fromString(String);
+
+    bool operator==(const LoRaUartSettings &b) const;
+    bool operator!=(const LoRaUartSettings &b) const;
 };
 
 /**
  * @brief Struct defined to store settings of the USR_LG206_P module
  *
  */
-class USR_LG_206_P_SETTINGS
+class LoRaSettings
 {
 public:
     int ATMode;
@@ -185,12 +188,15 @@ public:
     int testInterval;
     String key; // 16 bytes HEX format character string
 
-    USR_LG_206_P_SETTINGS(bool usingFactorySettings);
-    USR_LG_206_P_UART_SETTINGS *get_uart(void);
-    void set_uart(USR_LG_206_P_UART_SETTINGS *newUARTSettings);
+    LoRaSettings(bool usingFactorySettings);
+    LoRaUartSettings *get_uart(void);
+    void set_uart(LoRaUartSettings *newUARTSettings);
+
+    bool operator==(const LoRaSettings &b) const;
+    bool operator!=(const LoRaSettings &b) const;
 
 private:
-    USR_LG_206_P_UART_SETTINGS *uart;
+    LoRaUartSettings *uart;
 };
 
 #endif // USR_LG206_P_SETTINGS_H_

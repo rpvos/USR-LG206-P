@@ -1,7 +1,7 @@
 #include "USR_LG206_P_settings.h"
 #include <Arduino.h>
 
-USR_LG_206_P_UART_SETTINGS::USR_LG_206_P_UART_SETTINGS(bool usingFactorySettings)
+LoRaUartSettings::LoRaUartSettings(bool usingFactorySettings)
 {
     if (usingFactorySettings)
     {
@@ -21,12 +21,43 @@ USR_LG_206_P_UART_SETTINGS::USR_LG_206_P_UART_SETTINGS(bool usingFactorySettings
     };
 };
 
-String USR_LG_206_P_UART_SETTINGS::toString(void)
+bool LoRaUartSettings::operator!=(const LoRaUartSettings &b) const
+{
+    return !(*this == b);
+}
+
+bool LoRaUartSettings::operator==(const LoRaUartSettings &b) const
+{
+    if (this->buadrate != b.buadrate)
+    {
+        return false;
+    }
+    if (this->dataBits != b.dataBits)
+    {
+        return false;
+    }
+    if (this->stopBits != b.stopBits)
+    {
+        return false;
+    }
+    if (this->parity != b.parity)
+    {
+        return false;
+    }
+    if (this->flowControl != b.flowControl)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+String LoRaUartSettings::toString(void)
 {
     return String(this->buadrate) + "," + String(this->dataBits) + "," + String(this->stopBits) + "," + ToString(this->parity) + "," + ToString(this->flowControl);
 };
 
-int USR_LG_206_P_UART_SETTINGS::fromString(String input)
+int LoRaUartSettings::fromString(String input)
 {
     int index = input.indexOf(',');
     String baudrate = input.substring(0, index);
@@ -52,16 +83,16 @@ int USR_LG_206_P_UART_SETTINGS::fromString(String input)
     return true;
 };
 
-USR_LG_206_P_SETTINGS::USR_LG_206_P_SETTINGS(bool usingFactorySettings)
+LoRaSettings::LoRaSettings(bool usingFactorySettings)
 {
     if (usingFactorySettings)
     {
         this->ATMode = false;
-        this->commandEchoFunction = false;
+        this->commandEchoFunction = true;
         this->nodeID = "";
         this->firmwareVersion = "";
         this->workMode = work_mode_transparent;
-        this->uart = new USR_LG_206_P_UART_SETTINGS(usingFactorySettings);
+        this->uart = new LoRaUartSettings(usingFactorySettings);
         this->powerMode = powermode_run;
         this->wakeUpInterval = 2000;
         this->loraAirRateLevel = LoRa_air_rate_level_21875;
@@ -80,7 +111,7 @@ USR_LG_206_P_SETTINGS::USR_LG_206_P_SETTINGS(bool usingFactorySettings)
         this->nodeID = "";
         this->firmwareVersion = "";
         this->workMode = work_mode_undefined;
-        this->uart = new USR_LG_206_P_UART_SETTINGS(false);
+        this->uart = new LoRaUartSettings(false);
         this->powerMode = powermode_undefined;
         this->wakeUpInterval = SETTING_UNDEFINED;
         this->loraAirRateLevel = LoRa_air_rate_level_undefined;
@@ -94,13 +125,84 @@ USR_LG_206_P_SETTINGS::USR_LG_206_P_SETTINGS(bool usingFactorySettings)
     }
 };
 
-USR_LG_206_P_UART_SETTINGS *USR_LG_206_P_SETTINGS::get_uart(void)
+LoRaUartSettings *LoRaSettings::get_uart(void)
 {
     return this->uart;
 };
 
-void USR_LG_206_P_SETTINGS::set_uart(USR_LG_206_P_UART_SETTINGS *newUARTSettings)
+void LoRaSettings::set_uart(LoRaUartSettings *newUARTSettings)
 {
     delete this->uart;
     this->uart = newUARTSettings;
 };
+
+bool LoRaSettings::operator!=(const LoRaSettings &b) const
+{
+    return !(*this == b);
+}
+
+bool LoRaSettings::operator==(const LoRaSettings &b) const
+{
+    if (this->ATMode != b.ATMode)
+    {
+        return false;
+    }
+    if (this->commandEchoFunction != b.commandEchoFunction)
+    {
+        return false;
+    }
+    if (this->nodeID != b.nodeID)
+    {
+        return false;
+    }
+    if (this->firmwareVersion != b.firmwareVersion)
+    {
+        return false;
+    }
+    if (this->workMode != b.workMode)
+    {
+        return false;
+    }
+    if (*(this->uart) != *(b.uart))
+    {
+        return false;
+    }
+    if (this->powerMode != b.powerMode)
+    {
+        return false;
+    }
+    if (this->wakeUpInterval != b.wakeUpInterval)
+    {
+        return false;
+    }
+    if (this->loraAirRateLevel != b.loraAirRateLevel)
+    {
+        return false;
+    }
+    if (this->destinationAddress != b.destinationAddress)
+    {
+        return false;
+    }
+    if (this->destinationAddressIsSet != b.destinationAddressIsSet)
+    {
+        return false;
+    }
+    if (this->channel != b.channel)
+    {
+        return false;
+    }
+    if (this->forwardErrorCorrection != b.forwardErrorCorrection)
+    {
+        return false;
+    }
+    if (this->transmittingPower != b.transmittingPower)
+    {
+        return false;
+    }
+    if (this->testInterval != b.testInterval)
+    {
+        return false;
+    }
+
+    return true;
+}

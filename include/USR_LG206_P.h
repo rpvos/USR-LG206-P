@@ -14,6 +14,7 @@
 
 #include <Arduino.h>
 #include <USR_LG206_P_settings.h>
+#include <MAX485TTL.h>
 
 /**
  * @brief OUT is used as a identifier for output parameters
@@ -25,7 +26,7 @@
  * @brief Class used to connect and communicate to a LoRa module type USR_LG_206_P
  *
  */
-class USR_LG_206_P
+class LoRa
 {
 public:
     /**
@@ -33,7 +34,13 @@ public:
      *
      * @param serial the stream to which data needs to be sent to communicate with the module
      */
-    USR_LG_206_P(Stream *serial);
+    LoRa(RS485 *serial);
+
+    /**
+     * @brief Destroy the LoRa object
+     *
+     */
+    ~LoRa(void);
 
     /**
      * @brief Set the settings of the LoRa module to factory settings
@@ -43,10 +50,10 @@ public:
     int factory_reset(void);
 
     // TODO
-    int set_settings(USR_LG_206_P_SETTINGS *settings);
+    int set_settings(LoRaSettings *settings);
 
     // TODO
-    int get_settings(OUT USR_LG_206_P_SETTINGS &settings);
+    int get_settings(OUT LoRaSettings &settings);
 
     /**
      * @brief Function to start the AT mode
@@ -137,7 +144,7 @@ public:
      * @param settings variable containing the requested settings
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_uart(USR_LG_206_P_UART_SETTINGS *settings);
+    int set_uart(LoRaUartSettings *settings);
 
     /**
      * @brief Get the uart settings of the LoRa module
@@ -145,7 +152,7 @@ public:
      * @param settings OUTPUT variable used to store the requested value
      * @return true if succesfull, false if unsuccesfull
      */
-    int get_uart(OUT USR_LG_206_P_UART_SETTINGS &settings);
+    int get_uart(OUT LoRaUartSettings &settings);
 
     /**
      * @brief Set the power consumption mode
@@ -321,18 +328,20 @@ public:
      */
     int send_message(char *message);
 
+    String SendCommand(String command);
+
 private:
     /**
      * @brief Stream to which the communication with the module is sent
      *
      */
-    Stream *serial;
+    RS485 *serial;
 
     /**
      * @brief Object to keep the settings of the LoRa module
      * This is to counter frequent calls
      */
-    USR_LG_206_P_SETTINGS *settings;
+    LoRaSettings *settings;
 
     /**
      * @brief Function used to set the value on the LoRa module
@@ -340,7 +349,7 @@ private:
      * @param command which is used to set the value
      * @return int, true if succesfull, false if unsuccesfull
      */
-    int set_command(String command);
+    int SendSetCommand(String command, String succesfull_response = "OK");
 
     /**
      * @brief Function used to get a setting from the LoRa module
