@@ -189,8 +189,16 @@ int LoRa::get_echo(OUT bool &isOn)
 int LoRa::restart(void)
 {
     String command = "+Z\n";
+    int response = SendSetCommand(command);
 
-    return SendSetCommand(command);
+    // TODO Maybe check for LoRa start
+
+    if (response)
+    {
+        settings->ATMode = false;
+    }
+
+    return response;
 };
 
 int LoRa::save_as_default(void)
@@ -834,9 +842,13 @@ int LoRa::SendSetCommand(String command, String succesfull_response)
         }
     }
 
+    // TODO check for error
+    //  On error retry
+
     int index = received_data.indexOf(succesfull_response);
     if (index == -1)
     {
+        Serial.println("Here");
         return false;
     }
 

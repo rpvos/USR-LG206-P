@@ -45,34 +45,28 @@ void tearDown(void)
 {
 }
 
+/**
+ * @brief Test for entering AT mode
+ *
+ */
 void test_enter_at(void)
 {
     TEST_ASSERT_TRUE_MESSAGE(lora->begin_AT_mode(), "At mode not entered");
 }
 
+/**
+ * @brief Test for exiting AT mode
+ *
+ */
 void test_exit_at(void)
 {
     TEST_ASSERT_TRUE_MESSAGE(lora->end_AT_mode(), "At mode not exited");
 }
 
-void test_settings(void)
-{
-    LoRaSettings settings = LoRaSettings(false);
-    LoRaSettings settings2 = LoRaSettings(false);
-
-    lora->get_settings(settings);
-
-    TEST_ASSERT_TRUE_MESSAGE(settings2 == settings, "Standard settings not used");
-
-    lora->set_settings(&LoRaSettings(true));
-    settings2 = LoRaSettings(true);
-
-    lora->get_settings(settings);
-    TEST_ASSERT_TRUE_MESSAGE(settings2 == settings, "Settings not set succesfully");
-
-    // TODO add factory settings test
-}
-
+/**
+ * @brief Test made for production settings testing
+ *
+ */
 void test_setup(void)
 {
     TEST_ASSERT_TRUE_MESSAGE(lora->set_speed(LoRa_air_rate_level_21875), "Lora speed could not be set");
@@ -82,14 +76,91 @@ void test_setup(void)
     TEST_ASSERT_TRUE_MESSAGE(lora->set_address(1), "Lora address could not be set");
 }
 
+/**
+ * @brief Testing restart
+ *
+ */
 void test_restart(void)
 {
     TEST_ASSERT_TRUE_MESSAGE(lora->restart(), "Restart did not work");
 }
 
-void test_save_settings(void)
+/**
+ * @brief Testing all setting level settings
+ *
+ */
+void test_settings(void)
 {
+    LoRaSettings settings = LoRaSettings(false);
+    LoRaSettings settings2 = LoRaSettings(false);
+
+    // Test 1 for get settings
+    TEST_ASSERT_TRUE_MESSAGE(lora->get_settings(settings), "Getting the settings did not work");
+
+    TEST_ASSERT_TRUE_MESSAGE(settings2 == settings, "Standard settings not used");
+
+    // Test 1 for set settings to factory settings
+    TEST_ASSERT_TRUE_MESSAGE(lora->set_settings(&LoRaSettings(true)), "Set settings to factory settings did not work");
+    settings2 = LoRaSettings(true);
+    TEST_ASSERT_TRUE_MESSAGE(lora->get_settings(settings), "Settings not retrieved after setting to factory settings");
+    TEST_ASSERT_TRUE_MESSAGE(settings2 == settings, "Settings not set to factory settings succesfully");
+
+    // Test 1 for save as deafult and reset to default
+    TEST_ASSERT_TRUE_MESSAGE(lora->get_settings(settings), "Retieving settings did not succeed after factory settings were set");
     TEST_ASSERT_TRUE_MESSAGE(lora->save_as_default(), "Save as default did not work");
+    // Alter settings
+    TEST_ASSERT_TRUE_MESSAGE(lora->set_channel(66), "Settings not set after saved as default");
+    // Load default settings
+    TEST_ASSERT_TRUE_MESSAGE(lora->reset_to_default(), "Reset to default did not succeed");
+    // Compare current settings them with the previous set settings
+    TEST_ASSERT_TRUE_MESSAGE(lora->get_settings(settings2), "Retrieving settings did not succeed after setting to default");
+}
+
+/**
+ * @brief Test for all set and get settings
+ *
+ */
+void test_set_and_get(void)
+{
+    // TODO
+
+    // test_set_and_get_individual_template(lora->get_address, lora->set_address, 63);
+}
+
+void test_set_and_get_individual_template(int (*get_function)(int &out), int (*set_function)(int value), int value)
+{
+    // Make sure to test with a different setting then i was already set to
+    int out;
+    TEST_ASSERT_TRUE_MESSAGE(get_function(out), "Function get did not succeed");
+    TEST_ASSERT_EQUAL_INT_MESSAGE(out, value, "Function was already set to this setting");
+
+    // Test the set function
+    TEST_ASSERT_TRUE_MESSAGE(set_function(value), "Function set did not succeed");
+    int out2;
+    TEST_ASSERT_TRUE_MESSAGE(get_function(out2), "Function get did not succeed");
+    // New value gotten must be the same as value set to
+    TEST_ASSERT_EQUAL_INT_MESSAGE(value, out2, "Set did not work");
+}
+
+/**
+ * @brief Testing print function
+ *
+ */
+void test_print(void)
+{
+    TEST_ASSERT_TRUE_MESSAGE(lora->send_message("Hello world!"), "Message could not be send");
+}
+
+/**
+ * @brief Test for retrieving a message
+ *
+ */
+void test_retrieve(void)
+{
+    // TODO
+    String s = lora->retrieve_message();
+    // Serial.print(s);
+    TEST_ASSERT_TRUE_MESSAGE(s.length(), "Message could not be send");
 }
 
 /**
@@ -109,14 +180,16 @@ void setup()
     UNITY_BEGIN(); // Start unit testing
 
     RUN_TEST(test_enter_at);
-    // RUN_TEST(test_settings);
-    RUN_TEST(test_setup);
-    RUN_TEST(test_save_settings);
+    RUN_TEST(test_settings);
+    RUN_TEST(test_set_and_get);
     RUN_TEST(test_restart);
 
     // Enter at mode to test the exit at mode
     RUN_TEST(test_enter_at);
+    RUN_TEST(test_setup);
     RUN_TEST(test_exit_at);
+
+    RUN_TEST(test_print);
 
     UNITY_END(); // Stop unit testing
 
