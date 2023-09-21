@@ -292,14 +292,14 @@ public:
 
     /**
      * @brief Set the transmission interval of test data being sent
-     *
+     *  //TODO send interval
      * @return true if succesfull, false if unsuccesfull
      */
     int set_transmission_interval(int interval);
 
     /**
      * @brief Get the transmission interval of test data being sent
-     * // TODO implement a good way of receiving this data
+     * // TODO receive interval
      *
      * @return true if succesfull, false if unsuccesfull
      */
@@ -311,14 +311,14 @@ public:
      * @param key 16 bytes HEX format character string
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_key(String key);
+    int SetKey(String key = "FFFFFFFFFFFFFFFF");
 
     /**
      * @brief Function used to retrieve a message from the module
      *
      * @return the data received
      */
-    String retrieve_message(void);
+    String ReceiveMessage(void);
 
     /**
      * @brief Function used to send data
@@ -326,9 +326,7 @@ public:
      * @param message data that needs to be send
      * @return amount of bytes written
      */
-    int send_message(char *message);
-
-    String SendCommand(String command);
+    int SendMessage(char *message);
 
 private:
     /**
@@ -347,17 +345,27 @@ private:
      * @brief Function used to set the value on the LoRa module
      *
      * @param command which is used to set the value
+     * @param succesfullResponse is what is displayed on succes, defaulted to "OK"
      * @return int, true if succesfull, false if unsuccesfull
      */
-    int SendSetCommand(String command, String succesfull_response = "OK");
+    int SetCommand(String command, String succesfullResponse = "OK");
 
     /**
      * @brief Function used to get a setting from the LoRa module
      *
      * @param command Command for wich the value is stored
-     * @return String containing this value
+     * @param succesfullResponse is what is displayed on succes, defaulted to "OK"
+     * @return String containing this value, empty if not succeeded
      */
-    String get_command(String command);
+    String GetCommand(String command, String succesfullResponse = "OK");
+
+    /**
+     * @brief Helper function to send a command and wait for response
+     *
+     * @param command which needs to be send
+     * @return String response
+     */
+    String SendCommand(String command);
 
     /**
      * @brief Function used to log a warning when received data is not what expected
