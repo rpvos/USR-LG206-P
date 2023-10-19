@@ -1,14 +1,3 @@
-/**
- * @file test_max485ttl.cpp
- * @author rpvos (mr.rv.asd@gmail.com)
- * @brief Unit tests for the max485ttl.cpp
- * @version 0.1
- * @date 2023-09-20
- *
- * @copyright Copyright (c) 2023
- *
- */
-
 #include <Arduino.h>
 #include <unity.h>
 #include "USR_LG206_P.h"
