@@ -1,10 +1,23 @@
+/**
+ * @file test_max485ttl.cpp
+ * @author rpvos (mr.rv.asd@gmail.com)
+ * @brief Unit tests for the max485ttl.cpp
+ * @version 0.1
+ * @date 2023-09-20
+ *
+ * @copyright Copyright (c) 2023
+ *
+ */
+
 #include <Arduino.h>
 #include <unity.h>
 #include "USR_LG206_P.h"
 #include "max485ttl.h"
+#include "memory_stream.h"
 
-#define DE_PORT 2
-#define RE_PORT 3
+const uint8_t enable_pin = 2;
+
+MemoryStream *memory_stream;
 
 /**
  * @brief The object that is being used for sending data to the LoRa module
@@ -24,6 +37,9 @@ LoRa *lora;
  */
 void setUp(void)
 {
+    memory_stream = new MemoryStream(64, true, true);
+    rs = new RS485(enable_pin, enable_pin, memory_stream, false);
+    lora = new LoRa(rs);
 }
 
 /**
@@ -32,6 +48,9 @@ void setUp(void)
  */
 void tearDown(void)
 {
+    lora->~LoRa();
+    rs->~RS485();
+    memory_stream->~MemoryStream();
 }
 
 /**
@@ -40,7 +59,17 @@ void tearDown(void)
  */
 void test_enter_at(void)
 {
+    String response1 = String("a");
+    memory_stream->AddOutput(response1.c_str(), response1.length());
+    String response2 = String("+OK");
+    memory_stream->AddOutput(response2.c_str(), response2.length());
+
     TEST_ASSERT_TRUE_MESSAGE(lora->begin_AT_mode(), "At mode not entered");
+
+    String request1 = memory_stream->ReadInput();
+    TEST_ASSERT_TRUE(request1.equals("+++"));
+    String request2 = memory_stream->ReadInput();
+    TEST_ASSERT_TRUE(request2.equals("a"));
 }
 
 /**
@@ -49,6 +78,8 @@ void test_enter_at(void)
  */
 void test_exit_at(void)
 {
+    // TODO
+
     TEST_ASSERT_TRUE_MESSAGE(lora->end_AT_mode(), "At mode not exited");
 }
 
@@ -71,7 +102,20 @@ void test_setup(void)
  */
 void test_restart(void)
 {
+    // Setup mock input output
+    String expected_input = "AT+Z\r\n";
+    String expected_output = "AT+Z\r\n\r\nOK\r\n";
+
+    // Put the expected output in the buffer so it can be used in the function
+    uint8_t *read_buffer = memory_stream->GetSecondBuffer();
+    memcpy(read_buffer, expected_output.c_str(), expected_output.length());
+
     TEST_ASSERT_TRUE_MESSAGE(lora->restart(), "Restart did not work");
+
+    // Check for correct send message
+    // TODO
+    // String actual_input = memory_stream->();
+    // TEST_ASSERT_EQUAL_STRING(expected_input.c_str(), actual_input.c_str());
 }
 
 /**
@@ -80,6 +124,7 @@ void test_restart(void)
  */
 void test_settings(void)
 {
+    // TODO
     LoRaSettings settings = LoRaSettings(false);
     LoRaSettings settings2 = LoRaSettings(false);
 
@@ -134,6 +179,10 @@ void test_set_and_get(void)
 
 void test_echo(void)
 {
+    // Setup mock input output
+    String expected_input = "AT+E\r\n";
+    String expected_output = "AT+E\r\n\r\nOK=ON\r\n";
+
     bool value = false;
     // Make sure to test with a different setting then the currect setting
     bool original;
@@ -143,6 +192,13 @@ void test_echo(void)
     {
         value = !value;
     }
+
+    // TODO
+    //  TEST_ASSERT_EQUAL_STRING(expected_input.c_str(),memory_stream->Buffer);
+
+    // Setup mock input output
+    expected_input = "AT+E=OFF\r\n";
+    expected_output = "AT+E\r\n\r\nOK=ON\r\n";
 
     // Test the set function
     TEST_ASSERT_TRUE_MESSAGE(lora->set_echo(value), "Function set did not succeed");
@@ -344,10 +400,6 @@ void setup()
     // NOTE!!! Wait for >2 secs
     // if board doesn't support software reset via Serial.DTR/RTS
     delay(2000);
-
-    Serial1.begin(115200);
-    rs = new RS485(DE_PORT, RE_PORT, &Serial1);
-    lora = new LoRa(rs);
 
     UNITY_BEGIN(); // Start unit testing
 

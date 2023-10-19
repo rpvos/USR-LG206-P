@@ -1,4 +1,4 @@
-#include "USR_LG206_P_settings.h"
+#include "usr_lg206_p_settings.h"
 #include <Arduino.h>
 
 LoRaUartSettings::LoRaUartSettings(bool usingFactorySettings)
