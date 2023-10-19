@@ -9,10 +9,11 @@
  *
  */
 
-#include "USR_LG206_P.h"
-#include "USR_LG206_P_settings.h"
+#include "usr_lg206_p.h"
+#include "usr_lg206_p_settings.h"
 #include <Arduino.h>
 #include <MAX485TTL.h>
+#include <Regexp.h>
 
 // #define LOGGER_
 
@@ -175,7 +176,7 @@ int LoRa::restart(void)
     String command = "+Z\n";
     int response = SetCommand(command);
 
-    // TODO Maybe check for LoRa start
+    // TODO Check for LoRa start
 
     if (response)
     {
@@ -832,6 +833,40 @@ int LoRa::SetCommand(String command, String succesfullResponse)
     command = "AT" + command + "\n";
     String expected_data = command;
     String received_data = SendCommand(command);
+
+    // TODO regex
+    MatchState ms;
+    char outputBuffer[64];
+
+    char temp[received_data.length()];
+    received_data.toCharArray(temp, received_data.length());
+
+    // string we are searching
+    ms.Target(temp);
+
+    // search it
+    char result = ms.Match("AT%+([A-Z]+)=(%w+)[%s]*(%w+[-%d]*)", 0);
+
+    if (result == REGEXP_MATCHED)
+    {
+        for (int i = 0; i < ms.level; i++)
+        {
+            Serial.println("Succes");
+            Serial.println(ms.GetCapture(outputBuffer, i));
+        }
+    }
+    else
+    {
+        if (result == REGEXP_NOMATCH)
+        {
+            Serial.println("No match");
+        }
+        else
+        {
+            Serial.println("Error");
+            Serial.println(result, DEC);
+        }
+    }
 
     // If echo is enabled check for the repeated command
     if (this->settings->commandEchoFunction)

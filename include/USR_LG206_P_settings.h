@@ -12,33 +12,82 @@
  * @brief All settings for workmode
  *
  */
-enum WorkMode
+namespace Workmode
 {
-    work_mode_undefined = -1,
-    work_mode_transparent = 1,
-    work_mode_fixed_point = 2
-};
+    enum WorkMode
+    {
+        work_mode_undefined = -1,
+        work_mode_transparent = 1,
+        work_mode_fixed_point = 2
+    };
+} // namespace Workmode
 
 /**
  * @brief All settings for baudrate
  *
  */
-enum Baudrate
+namespace Baudrate
 {
-    baudrate_1200 = 1200,
-    baudrate_2400 = 2400,
-    baudrate_4800 = 4800,
-    baudrate_9200 = 9200,
-    baudrate_19200 = 19200,
-    baudrate_38400 = 38400,
-    baudrate_57600 = 57600,
-    baudrate_115200 = 115200,
-};
+    enum Baudrate
+    {
+        baudrate_1200 = 1200,
+        baudrate_2400 = 2400,
+        baudrate_4800 = 4800,
+        baudrate_9200 = 9200,
+        baudrate_19200 = 19200,
+        baudrate_38400 = 38400,
+        baudrate_57600 = 57600,
+        baudrate_115200 = 115200,
+    };
+} // namespace Baudrate
 
 /**
  * @brief All settings for parity
  *
  */
+namespace Parity
+{
+    enum Parity
+    {
+        parity_undefined = -1,
+        parity_none = 1,
+        parity_even = 2,
+        parity_odd = 3,
+    };
+    inline const char *ToString(Parity parity)
+    {
+        switch (parity)
+        {
+        case parity_none:
+            return "NONE";
+        case parity_even:
+            return "EVEN";
+        case parity_odd:
+            return "ODD";
+        default:
+            return "Undefined parity";
+        }
+    };
+    inline Parity ParityFromString(String data)
+    {
+        if (data == "NONE")
+        {
+            return parity_none;
+        }
+        else if (data == "EVEN")
+        {
+            return parity_even;
+        }
+        else if (data == "ODD")
+        {
+            return parity_odd;
+        }
+
+        return parity_undefined;
+    };
+
+} // namespace Parity
+
 enum Parity
 {
     parity_undefined = -1,
@@ -82,67 +131,76 @@ inline Parity ParityFromString(String data)
  * @brief All settings for flowcontrol
  *
  */
-enum Flowcontrol
+namespace Flowcontrol
 {
-    flowcontrol_undefined = -1,
-    flowcontrol_485 = 1,
-    flowcontrol_nfc = 2,
-};
-inline const char *ToString(Flowcontrol flowcontrol)
-{
-    switch (flowcontrol)
+    enum Flowcontrol
     {
-    case flowcontrol_485:
-        return "485";
-    case flowcontrol_nfc:
-        return "NFC";
-    default:
-        return "Undefined flowcontrol";
-    }
-};
-inline Flowcontrol FlowcontrolFromString(String data)
-{
-    if (data == "485")
+        flowcontrol_undefined = -1,
+        flowcontrol_485 = 1,
+        flowcontrol_nfc = 2,
+    };
+    inline const char *ToString(Flowcontrol flowcontrol)
     {
-        return flowcontrol_485;
-    }
-    else if (data == "NFC")
+        switch (flowcontrol)
+        {
+        case flowcontrol_485:
+            return "485";
+        case flowcontrol_nfc:
+            return "NFC";
+        default:
+            return "Undefined flowcontrol";
+        }
+    };
+    inline Flowcontrol FlowcontrolFromString(String data)
     {
-        return flowcontrol_nfc;
-    }
+        if (data == "485")
+        {
+            return flowcontrol_485;
+        }
+        else if (data == "NFC")
+        {
+            return flowcontrol_nfc;
+        }
 
-    return flowcontrol_undefined;
-};
+        return flowcontrol_undefined;
+    };
+} // namespace Flowcontrol
 
 /**
  * @brief All settings for power consumption mode
  *
  */
-enum PowerConsumptionMode
+namespace PowerConsumptionMode
 {
-    powermode_undefined = -1,
-    powermode_run = 1,
-    powermode_wake_up = 2,
-};
+    enum PowerConsumptionMode
+    {
+        powermode_undefined = -1,
+        powermode_run = 1,
+        powermode_wake_up = 2,
+    };
+} // namespace PowerConsumptionMode
 
 /**
  * @brief All settings for LoRa air rate level (Speed)
  *
  */
-enum LoRaAirRateLevel
+namespace LoRaAirRateLevel
 {
-    LoRa_air_rate_level_undefined = -1,
-    LoRa_air_rate_level_268 = 1,
-    LoRa_air_rate_level_488 = 2,
-    LoRa_air_rate_level_537 = 3,
-    LoRa_air_rate_level_878 = 4,
-    LoRa_air_rate_level_977 = 5,
-    LoRa_air_rate_level_1758 = 6,
-    LoRa_air_rate_level_3125 = 7,
-    LoRa_air_rate_level_6250 = 8,
-    LoRa_air_rate_level_10937 = 9,
-    LoRa_air_rate_level_21875 = 10,
-};
+    enum LoRaAirRateLevel
+    {
+        LoRa_air_rate_level_undefined = -1,
+        LoRa_air_rate_level_268 = 1,
+        LoRa_air_rate_level_488 = 2,
+        LoRa_air_rate_level_537 = 3,
+        LoRa_air_rate_level_878 = 4,
+        LoRa_air_rate_level_977 = 5,
+        LoRa_air_rate_level_1758 = 6,
+        LoRa_air_rate_level_3125 = 7,
+        LoRa_air_rate_level_6250 = 8,
+        LoRa_air_rate_level_10937 = 9,
+        LoRa_air_rate_level_21875 = 10,
+    };
+} // namespace LoRaAirRateLevel
 
 /**
  * @brief Class used to store set and retrieve UART settings
