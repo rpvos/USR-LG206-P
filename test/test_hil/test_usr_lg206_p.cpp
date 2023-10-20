@@ -60,7 +60,7 @@ void test_setup(void)
 {
     // TODO
     LoRaSettings settings = LoRaSettings(true);
-    settings.loraAirRateLevel = LoRaAirRateLevel::LoRa_air_rate_level_21875;
+    settings.loraAirRateLevel = LoRaAirRateLevel::kLoRaAirRateLevel21875;
     settings.channel = 72; // 470Mhz
     settings.destinationAddress = 1;
 }
@@ -178,7 +178,7 @@ void test_firmware_version(void)
 void test_wmode(void)
 {
 
-    Workmode::WorkMode value = Workmode::work_mode_fixed_point;
+    Workmode::WorkMode value = Workmode::kWorkModeFixedPoint;
     // Make sure to test with a different setting then the currect setting
     Workmode::WorkMode original;
     TEST_ASSERT_TRUE_MESSAGE(lora->get_wmode(original), "Function get did not succeed");
@@ -205,7 +205,7 @@ void test_wmode(void)
 
 void test_powermode(void)
 {
-    PowerConsumptionMode::PowerConsumptionMode value = PowerConsumptionMode::powermode_wake_up;
+    PowerConsumptionMode::PowerConsumptionMode value = PowerConsumptionMode::kPowerConsumptionModeWakeUp;
     // Make sure to test with a different setting then the currect setting
     PowerConsumptionMode::PowerConsumptionMode original;
     TEST_ASSERT_TRUE_MESSAGE(lora->get_power_consumption_mode(original), "Function get did not succeed");
@@ -233,7 +233,7 @@ void test_wake_up_interval(void) {}
 
 void test_speed(void)
 {
-    LoRaAirRateLevel::LoRaAirRateLevel value = LoRaAirRateLevel::LoRa_air_rate_level_10937;
+    LoRaAirRateLevel::LoRaAirRateLevel value = LoRaAirRateLevel::kLoRaAirRateLevel10937;
     // Make sure to test with a different setting then the currect setting
     LoRaAirRateLevel::LoRaAirRateLevel original;
     TEST_ASSERT_TRUE_MESSAGE(lora->get_speed(original), "Function get did not succeed");

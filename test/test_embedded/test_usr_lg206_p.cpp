@@ -37,7 +37,7 @@ LoRa *lora;
  */
 void setUp(void)
 {
-    memory_stream = new MemoryStream(64, true, true);
+    memory_stream = new MemoryStream(true);
     rs = new RS485(enable_pin, enable_pin, memory_stream, false);
     lora = new LoRa(rs);
 }
@@ -48,9 +48,9 @@ void setUp(void)
  */
 void tearDown(void)
 {
-    lora->~LoRa();
-    rs->~RS485();
-    memory_stream->~MemoryStream();
+    delete lora;
+    delete rs;
+    delete memory_stream;
 }
 
 /**
@@ -59,17 +59,23 @@ void tearDown(void)
  */
 void test_enter_at(void)
 {
-    String response1 = String("a");
-    memory_stream->AddOutput(response1.c_str(), response1.length());
-    String response2 = String("+OK");
-    memory_stream->AddOutput(response2.c_str(), response2.length());
+    { // Setup
+        String response1 = String("a");
+        memory_stream->AddOutput(response1.c_str(), response1.length());
+        String response2 = String("+OK");
+        memory_stream->AddOutput(response2.c_str(), response2.length());
+    }
 
-    TEST_ASSERT_TRUE_MESSAGE(lora->begin_AT_mode(), "At mode not entered");
+    TEST_ASSERT_TRUE_MESSAGE(lora->BeginAtMode(), "At mode not entered");
 
-    String request1 = memory_stream->ReadInput();
-    TEST_ASSERT_TRUE(request1.equals("+++"));
-    String request2 = memory_stream->ReadInput();
-    TEST_ASSERT_TRUE(request2.equals("a"));
+    { // Check message handling
+        int buffer_size = 64;
+        char buffer[buffer_size];
+        memory_stream->ReadInput(buffer, buffer_size);
+        TEST_ASSERT_EQUAL_STRING("+++", buffer);
+        memory_stream->ReadInput(buffer, buffer_size);
+        TEST_ASSERT_EQUAL_STRING("a", buffer);
+    }
 }
 
 /**
@@ -80,7 +86,7 @@ void test_exit_at(void)
 {
     // TODO
 
-    TEST_ASSERT_TRUE_MESSAGE(lora->end_AT_mode(), "At mode not exited");
+    TEST_ASSERT_TRUE_MESSAGE(lora->EndAtMode(), "At mode not exited");
 }
 
 /**
@@ -91,13 +97,13 @@ void test_setup(void)
 {
     // TODO
     LoRaSettings settings = LoRaSettings(true);
-    settings.loraAirRateLevel = LoRaAirRateLevel::LoRa_air_rate_level_21875;
+    settings.loraAirRateLevel = LoRaAirRateLevel::kLoRaAirRateLevel21875;
     settings.channel = 72; // 470Mhz
     settings.destinationAddress = 1;
 }
 
 /**
- * @brief Testing restart
+ * @brief Testing Restart
  *
  */
 void test_restart(void)
@@ -110,7 +116,7 @@ void test_restart(void)
     uint8_t *read_buffer = memory_stream->GetSecondBuffer();
     memcpy(read_buffer, expected_output.c_str(), expected_output.length());
 
-    TEST_ASSERT_TRUE_MESSAGE(lora->restart(), "Restart did not work");
+    TEST_ASSERT_TRUE_MESSAGE(lora->Restart(), "Restart did not work");
 
     // Check for correct send message
     // TODO
@@ -124,35 +130,34 @@ void test_restart(void)
  */
 void test_settings(void)
 {
-    // TODO
     LoRaSettings settings = LoRaSettings(false);
     LoRaSettings settings2 = LoRaSettings(false);
 
     // Test get settings
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_settings(settings), "Getting the settings did not work");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetSettings(settings), "Getting the settings did not work");
 
     TEST_ASSERT_TRUE_MESSAGE(settings2 == settings, "Standard settings not used");
 
     // Test factory settings
-    TEST_ASSERT_TRUE_MESSAGE(lora->set_settings(&LoRaSettings(true)), "Set settings to factory settings did not work");
+    TEST_ASSERT_TRUE_MESSAGE(lora->SetSettings(&LoRaSettings(true)), "Set settings to factory settings did not work");
     settings2 = LoRaSettings(true);
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_settings(settings), "Settings not retrieved after setting to factory settings");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetSettings(settings), "Settings not retrieved after setting to factory settings");
     TEST_ASSERT_TRUE_MESSAGE(settings2 == settings, "Settings not set to factory settings succesfully");
 
     // Test factory reset function
-    TEST_ASSERT_TRUE_MESSAGE(lora->factory_reset(), "Settings not retrieved after setting to factory settings");
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_settings(settings2), "Settings not retrieved after setting to factory settings");
+    TEST_ASSERT_TRUE_MESSAGE(lora->FactoryReset(), "Settings not retrieved after setting to factory settings");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetSettings(settings2), "Settings not retrieved after setting to factory settings");
     TEST_ASSERT_TRUE_MESSAGE(settings2 == settings, "Settings not set to factory settings succesfully");
 
     // Test save as deafult and reset to default
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_settings(settings), "Retieving settings did not succeed after factory settings were set");
-    TEST_ASSERT_TRUE_MESSAGE(lora->save_as_default(), "Save as default did not work");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetSettings(settings), "Retieving settings did not succeed after factory settings were set");
+    TEST_ASSERT_TRUE_MESSAGE(lora->SaveAsDefault(), "Save as default did not work");
     // Alter settings
     TEST_ASSERT_TRUE_MESSAGE(lora->set_channel(66), "Settings not set after saved as default");
     // Load default settings
-    TEST_ASSERT_TRUE_MESSAGE(lora->reset_to_default(), "Reset to default did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->ResetToDefault(), "Reset to default did not succeed");
     // Compare current settings them with the previous set settings
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_settings(settings2), "Retrieving settings did not succeed after setting to default");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetSettings(settings2), "Retrieving settings did not succeed after setting to default");
     TEST_ASSERT_TRUE_MESSAGE(settings2 == settings, "Settings not set to factory settings succesfully");
 }
 
@@ -186,7 +191,7 @@ void test_echo(void)
     bool value = false;
     // Make sure to test with a different setting then the currect setting
     bool original;
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_echo(original), "Function get did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetEcho(original), "Function get did not succeed");
     // Make sure to chose a new value that is in range
     if (original == value)
     {
@@ -201,22 +206,22 @@ void test_echo(void)
     expected_output = "AT+E\r\n\r\nOK=ON\r\n";
 
     // Test the set function
-    TEST_ASSERT_TRUE_MESSAGE(lora->set_echo(value), "Function set did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->SetEcho(value), "Function set did not succeed");
     bool out;
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_echo(out), "Function get did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetEcho(out), "Function get did not succeed");
     // New value gotten must be the same as value set to
     TEST_ASSERT_EQUAL_INT_MESSAGE(value, out, "Set did not work");
 
     // Set it back to original value
-    TEST_ASSERT_TRUE_MESSAGE(lora->set_echo(original), "Function set did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->SetEcho(original), "Function set did not succeed");
 }
 
 void test_node_id(void)
 {
     String original;
     String secondOriginal;
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_node_id(original), "Function get did not succeed");
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_node_id(secondOriginal), "Function get did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetNodeId(original), "Function get did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetNodeId(secondOriginal), "Function get did not succeed");
 
     TEST_ASSERT_EQUAL_STRING_MESSAGE(original.c_str(), secondOriginal.c_str(), "Node id was not the same");
 }
@@ -225,8 +230,8 @@ void test_firmware_version(void)
 {
     String original;
     String secondOriginal;
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_firmware_version(original), "Function get did not succeed");
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_firmware_version(secondOriginal), "Function get did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetFirmwareVersion(original), "Function get did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetFirmwareVersion(secondOriginal), "Function get did not succeed");
 
     TEST_ASSERT_EQUAL_STRING_MESSAGE(original.c_str(), secondOriginal.c_str(), "Firmware version was not the same");
 }
@@ -234,10 +239,10 @@ void test_firmware_version(void)
 void test_wmode(void)
 {
 
-    Workmode::WorkMode value = Workmode::work_mode_fixed_point;
+    Workmode::WorkMode value = Workmode::kWorkModeFixedPoint;
     // Make sure to test with a different setting then the currect setting
     Workmode::WorkMode original;
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_wmode(original), "Function get did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetWorkMode(original), "Function get did not succeed");
     // Make sure to chose a new value that is in range
     if (original == value)
     {
@@ -249,19 +254,19 @@ void test_wmode(void)
     }
 
     // Test the set function
-    TEST_ASSERT_TRUE_MESSAGE(lora->set_wmode(value), "Function set did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->SetWorkMode(value), "Function set did not succeed");
     Workmode::WorkMode out;
-    TEST_ASSERT_TRUE_MESSAGE(lora->get_wmode(out), "Function get did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->GetWorkMode(out), "Function get did not succeed");
     // New value gotten must be the same as value set to
     TEST_ASSERT_EQUAL_INT_MESSAGE(value, out, "Set did not work");
 
     // Set it back to original value
-    TEST_ASSERT_TRUE_MESSAGE(lora->set_wmode(original), "Function set did not succeed");
+    TEST_ASSERT_TRUE_MESSAGE(lora->SetWorkMode(original), "Function set did not succeed");
 }
 
 void test_powermode(void)
 {
-    PowerConsumptionMode::PowerConsumptionMode value = PowerConsumptionMode::powermode_wake_up;
+    PowerConsumptionMode::PowerConsumptionMode value = PowerConsumptionMode::kPowerConsumptionModeWakeUp;
     // Make sure to test with a different setting then the currect setting
     PowerConsumptionMode::PowerConsumptionMode original;
     TEST_ASSERT_TRUE_MESSAGE(lora->get_power_consumption_mode(original), "Function get did not succeed");
@@ -289,7 +294,7 @@ void test_wake_up_interval(void) {}
 
 void test_speed(void)
 {
-    LoRaAirRateLevel::LoRaAirRateLevel value = LoRaAirRateLevel::LoRa_air_rate_level_10937;
+    LoRaAirRateLevel::LoRaAirRateLevel value = LoRaAirRateLevel::kLoRaAirRateLevel10937;
     // Make sure to test with a different setting then the currect setting
     LoRaAirRateLevel::LoRaAirRateLevel original;
     TEST_ASSERT_TRUE_MESSAGE(lora->get_speed(original), "Function get did not succeed");
@@ -404,8 +409,8 @@ void setup()
     UNITY_BEGIN(); // Start unit testing
 
     RUN_TEST(test_enter_at);
-    RUN_TEST(test_settings);
-    RUN_TEST(test_set_and_get);
+    RUN_TEST(test_settings);    // TODO settings
+    RUN_TEST(test_set_and_get); // TODO set and get
     RUN_TEST(test_restart);
 
     // Enter at mode to test the exit at mode
