@@ -1,5 +1,4 @@
 #include "usr_lg206_p_uart_settings.h"
-#include <Arduino.h>
 
 LoRaUartSettings::LoRaUartSettings::LoRaUartSettings(bool usingFactorySettings)
 {

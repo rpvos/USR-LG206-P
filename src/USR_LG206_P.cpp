@@ -8,12 +8,7 @@
  * @copyright Copyright (c) 2023
  *
  */
-
 #include "usr_lg206_p.h"
-#include "usr_lg206_p_settings.h"
-#include "usr_lg206_p_uart_settings.h"
-#include <Arduino.h>
-#include <MAX485TTL.h>
 
 LoRa::LoRa(RS485 *serial)
 {
@@ -82,13 +77,19 @@ int LoRa::BeginAtMode(void)
 int LoRa::EndAtMode(void)
 {
     // Check if LoRa module was already out of AT mode
-    if (!(settings_->at_mode))
+    if (settings_->at_mode == LoRaSettings::kAtModeIsOff)
     {
         return true;
     }
 
     String command = "+ENTM";
-    return SetCommand(command, "OK");
+    bool succeeded = SetCommand(command, "OK");
+
+    if (succeeded)
+    {
+        settings_->at_mode = LoRaSettings::kAtModeIsOff;
+    }
+    return succeeded;
 };
 
 LoRaSettings::CommandEchoFunction LoRa::SetEcho(bool isOn)
@@ -838,7 +839,7 @@ String LoRa::SendCommand(String command)
 
 int LoRa::SetCommand(String command, String succesfullResponse)
 {
-    command = "AT" + command + "\n";
+    command = "AT" + command + "\r\n";
     String expected_data = command;
     String received_data = SendCommand(command);
 
@@ -876,7 +877,6 @@ int LoRa::SetCommand(String command, String succesfullResponse)
     int index = received_data.indexOf(succesfullResponse);
     if (index == -1)
     {
-        Serial.println("Response unsuccesfull");
         return false;
     }
 

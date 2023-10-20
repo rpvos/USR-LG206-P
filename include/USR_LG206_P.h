@@ -13,9 +13,10 @@
 #define USR_LG_206P_H_
 
 #include <Arduino.h>
-#include <usr_lg206_p_settings.h>
-#include <usr_lg206_p_uart_settings.h>
 #include <MAX485TTL.h>
+
+#include "usr_lg206_p_settings.h"
+#include "usr_lg206_p_uart_settings.h"
 
 /**
  * @brief OUT is used as a identifier for output parameters
