@@ -122,7 +122,7 @@ public:
      * @param firmware_version output parameter
      * @return true if succesfull, false if unsuccesfull
      */
-    int GetFirmwareVersion(OUT String &firmware_version);
+    int GetFirmwareVersion(OUT char *buffer);
 
     /**
      * @brief Function used to set the workmode
@@ -308,7 +308,7 @@ public:
      * @param message data that needs to be send
      * @return amount of bytes written
      */
-    int SendMessage(char *message);
+    int SendMessage(const char *message);
 
     /**
      * @brief Function used to send data when fixed point is enabled
@@ -319,7 +319,7 @@ public:
      * @param message_size is the size of data
      * @return int amount of bytes written
      */
-    int SendMessage(uint16_t destination_address, uint8_t channel, char *message, uint8_t message_size);
+    int SendMessage(uint16_t destination_address, uint8_t channel, const char *message, uint8_t message_size);
 
 private:
     /**

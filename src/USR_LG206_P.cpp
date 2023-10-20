@@ -109,7 +109,7 @@ LoRaSettings::CommandEchoFunction LoRa::SetEcho(bool isOn)
     // If the set command was done succesfull
     if (received_data)
     {
-        LoRaSettings::CommandEchoFunction setting;
+        LoRaSettings::CommandEchoFunction setting = LoRaSettings::kEchoFunctionUndefined;
         if (isOn)
         {
             setting = LoRaSettings::kEchoFunctionIsOn;
@@ -132,37 +132,31 @@ LoRaSettings::CommandEchoFunction LoRa::GetEcho()
         return settings_->command_echo_function;
     }
 
-    String command = "+E";
+    String command = "AT+E";
 
-    serial_->println("AT" + command);
+    serial_->println(command);
     String expected_data = command;
     serial_->WaitForInput();
     String received_data = serial_->readString();
-    // TODO check for contain
-    if (received_data != expected_data)
+
+    if (received_data.indexOf(expected_data) == -1)
     {
         return LoRaSettings::kEchoFunctionUndefined;
     }
 
-    serial_->WaitForInput();
-    received_data = serial_->readString();
-
     expected_data = "OK=";
-
-    String subStringed = received_data.substring(0, received_data.indexOf('='));
-
-    if (subStringed != expected_data)
+    if (received_data.indexOf(expected_data) == -1)
     {
         return LoRaSettings::kEchoFunctionUndefined;
     }
 
     String value = received_data.substring(received_data.indexOf('='));
-    if (value == "ON")
+    if (received_data.indexOf("ON") != -1)
     {
         settings_->command_echo_function = LoRaSettings::kEchoFunctionIsOn;
         return settings_->command_echo_function;
     }
-    else if (value == "OFF")
+    else if (received_data.indexOf("OFF") != -1)
     {
         settings_->command_echo_function = LoRaSettings::kEchoFunctionIsOff;
         return settings_->command_echo_function;
@@ -173,7 +167,7 @@ LoRaSettings::CommandEchoFunction LoRa::GetEcho()
 
 int LoRa::Restart(void)
 {
-    String command = "+Z\n";
+    String command = "+Z";
     int response = SetCommand(command);
 
     // TODO Check for LoRa start
@@ -239,11 +233,11 @@ int LoRa::GetNodeId(OUT String &node_id)
     return false;
 };
 
-int LoRa::GetFirmwareVersion(OUT String &firmware_version)
+int LoRa::GetFirmwareVersion(OUT char *buffer)
 {
     if (settings_->firmware_version != "")
     {
-        firmware_version = settings_->firmware_version;
+        memcpy(buffer, &settings_->firmware_version, settings_->firmware_version.length() + 1);
         return true;
     }
 
@@ -252,7 +246,8 @@ int LoRa::GetFirmwareVersion(OUT String &firmware_version)
 
     if (value)
     {
-        firmware_version = value;
+        settings_->firmware_version = value;
+        memcpy(buffer, &settings_->firmware_version, settings_->firmware_version.length() + 1);
         return true;
     }
 
@@ -773,7 +768,7 @@ String LoRa::ReceiveMessage(void)
     return "";
 };
 
-int LoRa::SendMessage(char *message)
+int LoRa::SendMessage(const char *message)
 {
     if (this->settings_->work_mode != LoRaSettings::kWorkModeTransparent)
     {
@@ -792,7 +787,7 @@ int LoRa::SendMessage(char *message)
     return false;
 };
 
-int LoRa::SendMessage(uint16_t destination_address, uint8_t channel, char *message, uint8_t message_size)
+int LoRa::SendMessage(uint16_t destination_address, uint8_t channel, const char *message, uint8_t message_size)
 {
     if (this->settings_->work_mode != LoRaSettings::kWorkModeFixedPoint)
     {
