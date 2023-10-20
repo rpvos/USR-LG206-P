@@ -92,16 +92,20 @@ int LoRa::EndAtMode(void)
     return succeeded;
 };
 
-LoRaSettings::CommandEchoFunction LoRa::SetEcho(bool isOn)
+LoRaSettings::CommandEchoFunction LoRa::SetEcho(LoRaSettings::CommandEchoFunction command_echo_function)
 {
     String command = "+E=";
-    if (isOn)
+    if (command_echo_function == LoRaSettings::kEchoFunctionIsOn)
     {
         command += "ON";
     }
-    else
+    else if (command_echo_function == LoRaSettings::kEchoFunctionIsOff)
     {
         command += "OFF";
+    }
+    else
+    {
+        return LoRaSettings::kEchoFunctionUndefined;
     }
 
     int received_data = SetCommand(command);
@@ -109,17 +113,8 @@ LoRaSettings::CommandEchoFunction LoRa::SetEcho(bool isOn)
     // If the set command was done succesfull
     if (received_data)
     {
-        LoRaSettings::CommandEchoFunction setting = LoRaSettings::kEchoFunctionUndefined;
-        if (isOn)
-        {
-            setting = LoRaSettings::kEchoFunctionIsOn;
-        }
-        else
-        {
-            setting = LoRaSettings::kEchoFunctionIsOn;
-        }
-        settings_->command_echo_function = setting;
-        return setting;
+        settings_->command_echo_function = command_echo_function;
+        return command_echo_function;
     }
 
     return LoRaSettings::kEchoFunctionUndefined;

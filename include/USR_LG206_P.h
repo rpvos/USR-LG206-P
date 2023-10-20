@@ -77,7 +77,7 @@ public:
      * @param isOn the value to which it is set
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaSettings::CommandEchoFunction SetEcho(bool is_on);
+    LoRaSettings::CommandEchoFunction SetEcho(LoRaSettings::CommandEchoFunction command_echo_function);
 
     /**
      * @brief Function used to get the currect value of the echo function command on the LoRa module

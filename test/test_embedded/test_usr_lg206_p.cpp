@@ -179,7 +179,7 @@ void test_echo(void)
 
     {     // Test set echo function off
         { // Setup
-            String response1 = String("AT+E\r\n\r\nOK=OFF\r\n");
+            String response1 = String("AT+E=OFF\r\n\r\nOK\r\n");
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
@@ -187,24 +187,17 @@ void test_echo(void)
 
         { // Check message handling
             memory_stream->ReadInput(buffer, buffer_size);
-            TEST_ASSERT_EQUAL_STRING("AT+E=OFF\r\n\r\nOK\r\n", buffer);
+            TEST_ASSERT_EQUAL_STRING("AT+E=OFF\r\n", buffer);
             memory_stream->ReadInput(buffer, buffer_size);
             TEST_ASSERT_EQUAL_STRING("", buffer);
         }
     }
 
-    {     // Test get for echo function off
-        { // Setup
-            String response1 = String("AT+E\r\n\r\nOK=OFF\r\n");
-            memory_stream->AddOutput(response1.c_str(), response1.length());
-        }
-
+    {
         command_echo_function = lora->GetEcho();
         TEST_ASSERT_EQUAL(LoRaSettings::kEchoFunctionIsOff, command_echo_function);
 
         { // Check message handling
-            memory_stream->ReadInput(buffer, buffer_size);
-            TEST_ASSERT_EQUAL_STRING("AT+E\r\n", buffer);
             memory_stream->ReadInput(buffer, buffer_size);
             TEST_ASSERT_EQUAL_STRING("", buffer);
         }
@@ -212,7 +205,7 @@ void test_echo(void)
 
     {     // Test set echo function on
         { // Setup
-            String response1 = String("AT+E\r\n\r\nOK=ON\r\n");
+            String response1 = String("AT+E=ON\r\n\r\nOK\r\n");
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
@@ -220,24 +213,17 @@ void test_echo(void)
 
         { // Check message handling
             memory_stream->ReadInput(buffer, buffer_size);
-            TEST_ASSERT_EQUAL_STRING("AT+E=ON\r\n\r\nOK\r\n", buffer);
+            TEST_ASSERT_EQUAL_STRING("AT+E=ON\r\n", buffer);
             memory_stream->ReadInput(buffer, buffer_size);
             TEST_ASSERT_EQUAL_STRING("", buffer);
         }
     }
 
-    {     // Test get for echo function on
-        { // Setup
-            String response1 = String("AT+E\r\n\r\nOK=ON\r\n");
-            memory_stream->AddOutput(response1.c_str(), response1.length());
-        }
-
+    { // Test get for echo function on
         command_echo_function = lora->GetEcho();
-        TEST_ASSERT_EQUAL(LoRaSettings::kEchoFunctionIsOff, command_echo_function);
+        TEST_ASSERT_EQUAL(LoRaSettings::kEchoFunctionIsOn, command_echo_function);
 
         { // Check message handling
-            memory_stream->ReadInput(buffer, buffer_size);
-            TEST_ASSERT_EQUAL_STRING("AT+E\r\n", buffer);
             memory_stream->ReadInput(buffer, buffer_size);
             TEST_ASSERT_EQUAL_STRING("", buffer);
         }
