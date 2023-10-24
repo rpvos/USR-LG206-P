@@ -15,6 +15,7 @@
 #include <Arduino.h>
 #include <MAX485TTL.h>
 
+#include "usr_lg206_p_error_code.h"
 #include "usr_lg206_p_settings.h"
 #include "usr_lg206_p_uart_settings.h"
 
@@ -49,27 +50,27 @@ public:
      *
      * @return int, true if succesfull and false if unsuccesfull
      */
-    int FactoryReset(void);
+    LoRaErrorCode FactoryReset(void);
 
     // TODO
-    int SetSettings(LoRaSettings::LoRaSettings *settings);
+    LoRaErrorCode SetSettings(LoRaSettings::LoRaSettings *settings);
 
     // TODO
-    int GetSettings(OUT LoRaSettings::LoRaSettings &settings);
+    LoRaErrorCode GetSettings(OUT LoRaSettings::LoRaSettings &settings);
 
     /**
      * @brief Function to start the AT mode
      *
      * @return int, true if succesfull and false if unsuccesfull
      */
-    int BeginAtMode(void);
+    LoRaErrorCode BeginAtMode(void);
 
     /**
      * @brief Function to end the AT mode and start transmission mode
      *
      * @return true if succesfull and false if unsuccesfull
      */
-    int EndAtMode(void);
+    LoRaErrorCode EndAtMode(void);
 
     /**
      * @brief Function used to set the function echo boolean
@@ -77,7 +78,7 @@ public:
      * @param isOn the value to which it is set
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaSettings::CommandEchoFunction SetEcho(LoRaSettings::CommandEchoFunction command_echo_function);
+    LoRaErrorCode SetEcho(LoRaSettings::CommandEchoFunction command_echo_function);
 
     /**
      * @brief Function used to get the currect value of the echo function command on the LoRa module
@@ -85,28 +86,28 @@ public:
      * @param isOn OUTPUT variable used to store the requested value
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaSettings::CommandEchoFunction GetEcho();
+    LoRaErrorCode GetEcho(LoRaSettings::CommandEchoFunction &setting);
 
     /**
      * @brief Function used to restart the LoRa module
      *
      * @return true if succesfull
      */
-    int Restart(void);
+    LoRaErrorCode Restart(void);
 
     /**
      * @brief Function used to set the current settings as new default
      *
      * @return true if succesfull, false if unsuccesfull
      */
-    int SaveAsDefault(void);
+    LoRaErrorCode SaveAsDefault(void);
 
     /**
      * @brief Function used to reset settings to default
      *
      * @return true if succesfull, false if unsuccesfull
      */
-    int ResetToDefault(void);
+    LoRaErrorCode ResetToDefault(void);
 
     /**
      * @brief Get the node id
@@ -114,7 +115,7 @@ public:
      * @param node_id output parameter
      * @return true if succesfull, false if unsuccesfull
      */
-    int GetNodeId(OUT String &node_id);
+    LoRaErrorCode GetNodeId(OUT String &node_id);
 
     /**
      * @brief Get the firmware version
@@ -122,7 +123,7 @@ public:
      * @param firmware_version output parameter
      * @return true if succesfull, false if unsuccesfull
      */
-    int GetFirmwareVersion(OUT String &firmware_version);
+    LoRaErrorCode GetFirmwareVersion(OUT String &firmware_version);
 
     /**
      * @brief Function used to set the workmode
@@ -130,7 +131,7 @@ public:
      * @param wmode WorkMode (kWorkModeTransparent or kWorkModeFixedPoint)
      * @return true if succesfull, false if unsuccesfull
      */
-    int SetWorkMode(LoRaSettings::WorkMode work_mode = LoRaSettings::kWorkModeTransparent);
+    LoRaErrorCode SetWorkMode(LoRaSettings::WorkMode work_mode = LoRaSettings::WorkMode::kWorkModeTransparent);
 
     /**
      * @brief Function used to get the work mode
@@ -138,7 +139,7 @@ public:
      * @param wmode OUTPUT variable used to store the requested value
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaSettings::WorkMode GetWorkMode();
+    LoRaErrorCode GetWorkMode(LoRaSettings::WorkMode &setting);
 
     /**
      * @brief Set the uart settings of the LoRa module
@@ -146,7 +147,7 @@ public:
      * @param settings variable containing the requested settings
      * @return true if succesfull, false if unsuccesfull
      */
-    int SetUartSettings(LoRaUartSettings::LoRaUartSettings *settings);
+    LoRaErrorCode SetUartSettings(LoRaUartSettings::LoRaUartSettings *setting);
 
     /**
      * @brief Get the uart settings of the LoRa module
@@ -154,7 +155,7 @@ public:
      * @param settings OUTPUT variable used to store the requested value
      * @return true if succesfull, false if unsuccesfull
      */
-    int GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings &settings);
+    LoRaErrorCode GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *setting);
 
     /**
      * @brief Set the power consumption mode
@@ -162,7 +163,7 @@ public:
      * @param powermode (POWERMODE_RUN, POWERMODE_WU)
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_power_consumption_mode(LoRaSettings::PowerConsumptionMode powermode = LoRaSettings::kPowerConsumptionModeRun);
+    LoRaErrorCode SetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode powermode = LoRaSettings::PowerConsumptionMode::kPowerConsumptionModeRun);
 
     /**
      * @brief Get the power consumption mode
@@ -170,7 +171,7 @@ public:
      * @param powermode (POWERMODE_RUN, POWERMODE_WU)
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaSettings::PowerConsumptionMode get_power_consumption_mode();
+    LoRaErrorCode GetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode &setting);
 
     /**
      * @brief Set the waking up interval
@@ -178,7 +179,7 @@ public:
      * @param wake_up_interval 500-4000 in ms
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_waking_up_interval(int wake_up_interval);
+    LoRaErrorCode set_waking_up_interval(int setting);
 
     /**
      * @brief Get the waking up interval
@@ -186,7 +187,7 @@ public:
      * @param wake_up_interval in ms
      * @return true if succesfull, false if unsuccesfull
      */
-    int get_waking_up_interval(OUT int &wake_up_interval);
+    LoRaErrorCode get_waking_up_interval(OUT int &setting);
 
     /**
      * @brief Function used to set the LoRa air rate level
@@ -194,7 +195,7 @@ public:
      * @param speed value for air rate in bits per second
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_speed(LoRaSettings::LoRaAirRateLevel air_rate_level = LoRaSettings::kLoRaAirRateLevel21875);
+    LoRaErrorCode set_speed(LoRaSettings::LoRaAirRateLevel setting = LoRaSettings::LoRaAirRateLevel::kLoRaAirRateLevel21875);
 
     /**
      * @brief Function used to set the LoRa air rate level
@@ -202,7 +203,7 @@ public:
      * @param speed value for air rate in bits per second
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaSettings::LoRaAirRateLevel get_speed();
+    LoRaErrorCode get_speed(LoRaSettings::LoRaAirRateLevel &setting);
 
     /**
      * @brief Function used to set the destination address
@@ -210,7 +211,7 @@ public:
      * @param address value between 0-65535 where 65535 a broadcast address is
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_address(int address);
+    LoRaErrorCode set_address(int address);
 
     /**
      * @brief Function used to set the destination address
@@ -218,7 +219,7 @@ public:
      * @param OUTPUT address value between 0-65535 where 65535 a broadcast address is
      * @return true if succesfull, false if unsuccesfull
      */
-    int get_address(OUT int &address);
+    LoRaErrorCode get_address(OUT int &address);
 
     /**
      * @brief Function used to get the LoRa air rate level
@@ -228,7 +229,7 @@ public:
      *  H: 0~127 Working frequency band=(803+ch)Mhz (Default is 65, frequency band 868Mhz)
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_channel(int channel);
+    LoRaErrorCode set_channel(int channel);
 
     /**
      * @brief Function used to get the LoRa air rate level
@@ -238,7 +239,7 @@ public:
      *  H: 0~127 Working frequency band=(803+ch)Mhz (Default is 65, frequency band 868Mhz)
      * @return true if succesfull, false if unsuccesfull
      */
-    int get_channel(OUT int &channel);
+    LoRaErrorCode get_channel(OUT int &channel);
 
     /**
      * @brief Set the forward error correction on or off
@@ -246,7 +247,7 @@ public:
      * @param isOn true for forward error correction turned on and false for turned off
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_forward_error_correction(LoRaSettings::ForwardErrorCorrection setting = LoRaSettings::kForwardErrorCorrectionIsOff);
+    LoRaErrorCode set_forward_error_correction(LoRaSettings::ForwardErrorCorrection setting = LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOff);
 
     /**
      * @brief Get the forward error correction value
@@ -254,7 +255,7 @@ public:
      * @param isOn OUTPUT true for forward error correction turned on and false for turned off
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaSettings::ForwardErrorCorrection get_forward_error_correction();
+    LoRaErrorCode get_forward_error_correction(LoRaSettings::ForwardErrorCorrection &setting);
 
     /**
      * @brief Set the power transmission value
@@ -262,7 +263,7 @@ public:
      * @param power Amount of power in dBm (10~20)
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_power_transmission_value(int power);
+    LoRaErrorCode set_power_transmission_value(int power = 20);
 
     /**
      * @brief Set the power transmission value
@@ -270,14 +271,14 @@ public:
      * @param power OUTPUT Amount of power in dBm (10~20)
      * @return true if succesfull, false if unsuccesfull
      */
-    int get_power_transmission_value(OUT int &power);
+    LoRaErrorCode get_power_transmission_value(OUT int &power);
 
     /**
      * @brief Set the transmission interval of test data being sent
      *  //TODO send interval
      * @return true if succesfull, false if unsuccesfull
      */
-    int set_transmission_interval(int interval);
+    LoRaErrorCode set_transmission_interval(int interval);
 
     /**
      * @brief Get the transmission interval of test data being sent
@@ -285,7 +286,7 @@ public:
      *
      * @return true if succesfull, false if unsuccesfull
      */
-    int get_transmission_interval(OUT int &interval);
+    LoRaErrorCode get_transmission_interval(OUT int &interval);
 
     /**
      * @brief Set the key to encrypt the data transmission with
@@ -293,7 +294,7 @@ public:
      * @param key 16 bytes HEX format character string
      * @return true if succesfull, false if unsuccesfull
      */
-    int SetKey(String key = "FFFFFFFFFFFFFFFF");
+    LoRaErrorCode SetKey(String key = "FFFFFFFFFFFFFFFF");
 
     /**
      * @brief Function used to retrieve a message from the module
@@ -341,7 +342,7 @@ private:
      * @param succesfullResponse is what is displayed on succes, defaulted to "OK"
      * @return int, true if succesfull, false if unsuccesfull
      */
-    int SetCommand(String command, String succesfullResponse = "OK");
+    LoRaErrorCode SetCommand(String command, String succesfullResponse = "OK");
 
     /**
      * @brief Function used to get a setting from the LoRa module
@@ -350,7 +351,7 @@ private:
      * @param succesfullResponse is what is displayed on succes, defaulted to "OK"
      * @return String containing this value, empty if not succeeded
      */
-    String GetCommand(String command, String succesfullResponse = "OK");
+    LoRaErrorCode GetCommand(String command, OUT String &ouput, bool using_colon = true, String succesfullResponse = "OK");
 
     /**
      * @brief Helper function to send a command and wait for response

@@ -5,31 +5,31 @@
 
 namespace LoRaSettings
 {
-    enum AtMode
+    enum class AtMode
     {
         kAtModeUndefined = 0,
         kAtModeIsOn = 1,
         kAtModeIsOff = 2,
     };
-    enum CommandEchoFunction
+    enum class CommandEchoFunction
     {
-        kEchoFunctionUndefined = 0,
-        kEchoFunctionIsOn = 1,
-        kEchoFunctionIsOff = 2,
+        kCommandEchoFunctionUndefined = 0,
+        kCommandEchoFunctionIsOn = 1,
+        kCommandEchoFunctionIsOff = 2,
     };
-    enum WorkMode
+    enum class WorkMode
     {
         kWorkModeUndefined = 0,
         kWorkModeTransparent = 1,
         kWorkModeFixedPoint = 2
     };
-    enum PowerConsumptionMode
+    enum class PowerConsumptionMode
     {
         kPowerConsumptionModeUndefined = 0,
         kPowerConsumptionModeRun = 1,
         kPowerConsumptionModeWakeUp = 2,
     };
-    enum LoRaAirRateLevel
+    enum class LoRaAirRateLevel
     {
         kLoRaAirRateLevelUndefined = 0,
         kLoRaAirRateLevel268 = 1,
@@ -43,7 +43,7 @@ namespace LoRaSettings
         kLoRaAirRateLevel10937 = 9,
         kLoRaAirRateLevel21875 = 10,
     };
-    enum ForwardErrorCorrection
+    enum class ForwardErrorCorrection
     {
         kForwardErrorCorrectionUndefined = 0,
         kForwardErrorCorrectionIsOn = 1,
@@ -62,7 +62,7 @@ namespace LoRaSettings
         String node_id;
         String firmware_version;
         WorkMode work_mode;
-        PowerConsumptionMode power_mode;
+        PowerConsumptionMode power_consumption_mode;
         int wake_up_interval;
         LoRaAirRateLevel lora_air_rate_level;
         uint16_t destination_address;

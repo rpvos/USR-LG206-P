@@ -54,7 +54,7 @@ void test_enter_at(void)
         memory_stream->AddOutput(response2.c_str(), response2.length());
     }
 
-    TEST_ASSERT_TRUE_MESSAGE(lora->BeginAtMode(), "At mode not entered");
+    TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->BeginAtMode(), "At mode not entered");
 
     { // Check message handling
         memory_stream->ReadInput(buffer, buffer_size);
@@ -65,7 +65,7 @@ void test_enter_at(void)
         TEST_ASSERT_EQUAL_STRING("", buffer);
     }
 
-    TEST_ASSERT_TRUE_MESSAGE(lora->BeginAtMode(), "At mode was not saved");
+    TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->BeginAtMode(), "At mode was not saved");
     memory_stream->ReadInput(buffer, buffer_size);
     TEST_ASSERT_EQUAL_STRING("", buffer);
 }
@@ -81,7 +81,7 @@ void test_exit_at(void)
         memory_stream->AddOutput(response1.c_str(), response1.length());
     }
 
-    TEST_ASSERT_TRUE_MESSAGE(lora->EndAtMode(), "At mode not exited");
+    TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->EndAtMode(), "At mode not exited");
 
     { // Check message handling
         memory_stream->ReadInput(buffer, buffer_size);
@@ -91,7 +91,7 @@ void test_exit_at(void)
     }
 
     // Test if returned true when already in Atmode
-    TEST_ASSERT_TRUE_MESSAGE(lora->EndAtMode(), "At mode not exited");
+    TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->EndAtMode(), "At mode not exited");
 
     // Nothing must be send
     memory_stream->ReadInput(buffer, buffer_size);
@@ -109,7 +109,7 @@ void test_restart(void)
         memory_stream->AddOutput(response1.c_str(), response1.length());
     }
 
-    TEST_ASSERT_TRUE_MESSAGE(lora->Restart(), "Restart did not work");
+    TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->Restart(), "Restart did not work");
 
     { // Check message handling
         memory_stream->ReadInput(buffer, buffer_size);
@@ -166,8 +166,9 @@ void test_echo(void)
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
-        command_echo_function = lora->GetEcho();
-        TEST_ASSERT_EQUAL(LoRaSettings::kEchoFunctionIsOn, command_echo_function);
+        LoRaErrorCode response_code = lora->GetEcho(command_echo_function);
+        TEST_ASSERT_EQUAL(LoRaErrorCode::kSucces, response_code);
+        TEST_ASSERT_EQUAL(LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn, command_echo_function);
 
         { // Check message handling
             memory_stream->ReadInput(buffer, buffer_size);
@@ -183,7 +184,7 @@ void test_echo(void)
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
-        TEST_ASSERT_TRUE_MESSAGE(lora->SetEcho(LoRaSettings::kEchoFunctionIsOff), "Function set did not succeed");
+        TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SetEcho(LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOff), "Function set did not succeed");
 
         { // Check message handling
             memory_stream->ReadInput(buffer, buffer_size);
@@ -194,8 +195,9 @@ void test_echo(void)
     }
 
     {
-        command_echo_function = lora->GetEcho();
-        TEST_ASSERT_EQUAL(LoRaSettings::kEchoFunctionIsOff, command_echo_function);
+        LoRaErrorCode response_code = lora->GetEcho(command_echo_function);
+        TEST_ASSERT_EQUAL(LoRaErrorCode::kSucces, response_code);
+        TEST_ASSERT_EQUAL(LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOff, command_echo_function);
 
         { // Check message handling
             memory_stream->ReadInput(buffer, buffer_size);
@@ -209,7 +211,7 @@ void test_echo(void)
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
-        TEST_ASSERT_TRUE_MESSAGE(lora->SetEcho(LoRaSettings::kEchoFunctionIsOn), "Function set did not succeed");
+        TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SetEcho(LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn), "Function set did not succeed");
 
         { // Check message handling
             memory_stream->ReadInput(buffer, buffer_size);
@@ -220,8 +222,9 @@ void test_echo(void)
     }
 
     { // Test get for echo function on
-        command_echo_function = lora->GetEcho();
-        TEST_ASSERT_EQUAL(LoRaSettings::kEchoFunctionIsOn, command_echo_function);
+        LoRaErrorCode response_code = lora->GetEcho(command_echo_function);
+        TEST_ASSERT_EQUAL(LoRaErrorCode::kSucces, response_code);
+        TEST_ASSERT_EQUAL(LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn, command_echo_function);
 
         { // Check message handling
             memory_stream->ReadInput(buffer, buffer_size);
@@ -241,7 +244,8 @@ void test_node_id(void)
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
-        TEST_ASSERT_TRUE(lora->GetNodeId(node_id));
+        LoRaErrorCode response_code = lora->GetNodeId(node_id);
+        TEST_ASSERT_EQUAL(LoRaErrorCode::kSucces, response_code);
         TEST_ASSERT_EQUAL_STRING("FFFFFFFF", node_id.c_str());
 
         { // Check message handling
@@ -258,7 +262,9 @@ void test_node_id(void)
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
-        TEST_ASSERT_TRUE(lora->GetNodeId(second_node_id));
+        LoRaErrorCode response_code = lora->GetNodeId(second_node_id);
+        TEST_ASSERT_EQUAL(LoRaErrorCode::kSucces, response_code);
+        TEST_ASSERT_EQUAL_STRING("FFFFFFFF", second_node_id.c_str());
         TEST_ASSERT_EQUAL_STRING(node_id.c_str(), second_node_id.c_str());
 
         { // Check message handling
@@ -279,7 +285,9 @@ void test_firmware_version(void)
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
-        TEST_ASSERT_TRUE(lora->GetFirmwareVersion(firmware_version));
+        // TODO fix get firmware version
+        LoRaErrorCode response_code = lora->GetFirmwareVersion(firmware_version);
+        TEST_ASSERT_EQUAL(LoRaErrorCode::kSucces, response_code);
         TEST_ASSERT_EQUAL_STRING("1.1.1", firmware_version.c_str());
 
         { // Check message handling
@@ -296,7 +304,9 @@ void test_firmware_version(void)
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
-        TEST_ASSERT_TRUE(lora->GetFirmwareVersion(second_firmware_version));
+        LoRaErrorCode response_code = lora->GetFirmwareVersion(second_firmware_version);
+        TEST_ASSERT_EQUAL(LoRaErrorCode::kSucces, response_code);
+        TEST_ASSERT_EQUAL_STRING("1.1.1", second_firmware_version.c_str());
         TEST_ASSERT_EQUAL_STRING(firmware_version.c_str(), second_firmware_version.c_str());
 
         { // Check message handling
@@ -312,7 +322,7 @@ void test_firmware_version(void)
 //     Workmode::WorkMode value = Workmode::kWorkModeFixedPoint;
 //     // Make sure to test with a different setting then the currect setting
 //     Workmode::WorkMode original;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->GetWorkMode(original), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->GetWorkMode(original), "Function get did not succeed");
 //     // Make sure to chose a new value that is in range
 //     if (original == value)
 //     {
@@ -324,14 +334,14 @@ void test_firmware_version(void)
 //     }
 
 //     // Test the set function
-//     TEST_ASSERT_TRUE_MESSAGE(lora->SetWorkMode(value), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->SetWorkMode(value), "Function set did not succeed");
 //     Workmode::WorkMode out;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->GetWorkMode(out), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->GetWorkMode(out), "Function get did not succeed");
 //     // New value gotten must be the same as value set to
 //     TEST_ASSERT_EQUAL_INT_MESSAGE(value, out, "Set did not work");
 
 //     // Set it back to original value
-//     TEST_ASSERT_TRUE_MESSAGE(lora->SetWorkMode(original), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->SetWorkMode(original), "Function set did not succeed");
 // }
 
 // void test_powermode(void)
@@ -339,7 +349,7 @@ void test_firmware_version(void)
 //     PowerConsumptionMode::PowerConsumptionMode value = PowerConsumptionMode::kPowerConsumptionModeWakeUp;
 //     // Make sure to test with a different setting then the currect setting
 //     PowerConsumptionMode::PowerConsumptionMode original;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->get_power_consumption_mode(original), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->GetPowerConsumptionMode(original), "Function get did not succeed");
 //     // Make sure to chose a new value that is in range
 //     if (original == value)
 //     {
@@ -351,14 +361,14 @@ void test_firmware_version(void)
 //     }
 
 //     // Test the set function
-//     TEST_ASSERT_TRUE_MESSAGE(lora->set_power_consumption_mode(value), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->SetPowerConsumptionMode(value), "Function set did not succeed");
 //     PowerConsumptionMode::PowerConsumptionMode out;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->get_power_consumption_mode(out), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->GetPowerConsumptionMode(out), "Function get did not succeed");
 //     // New value gotten must be the same as value set to
 //     TEST_ASSERT_EQUAL_INT_MESSAGE(value, out, "Set did not work");
 
 //     // Set it back to original value
-//     TEST_ASSERT_TRUE_MESSAGE(lora->set_power_consumption_mode(original), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->SetPowerConsumptionMode(original), "Function set did not succeed");
 // }
 // void test_wake_up_interval(void) {}
 
@@ -367,7 +377,7 @@ void test_firmware_version(void)
 //     LoRaAirRateLevel::LoRaAirRateLevel value = LoRaAirRateLevel::kLoRaAirRateLevel10937;
 //     // Make sure to test with a different setting then the currect setting
 //     LoRaAirRateLevel::LoRaAirRateLevel original;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->get_speed(original), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->get_speed(original), "Function get did not succeed");
 //     // Make sure to chose a new value that is in range
 //     if (original == value)
 //     {
@@ -379,14 +389,14 @@ void test_firmware_version(void)
 //     }
 
 //     // Test the set function
-//     TEST_ASSERT_TRUE_MESSAGE(lora->set_speed(value), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->set_speed(value), "Function set did not succeed");
 //     LoRaAirRateLevel::LoRaAirRateLevel out;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->get_speed(out), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->get_speed(out), "Function get did not succeed");
 //     // New value gotten must be the same as value set to
 //     TEST_ASSERT_EQUAL_INT_MESSAGE(value, out, "Set did not work");
 
 //     // Set it back to original value
-//     TEST_ASSERT_TRUE_MESSAGE(lora->set_speed(original), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->set_speed(original), "Function set did not succeed");
 // }
 
 // void test_address(void)
@@ -394,7 +404,7 @@ void test_firmware_version(void)
 //     int value = 2;
 //     // Make sure to test with a different setting then the currect setting
 //     int original;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->get_address(original), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->get_address(original), "Function get did not succeed");
 //     // Make sure to chose a new value that is in range
 //     if (original == value)
 //     {
@@ -402,14 +412,14 @@ void test_firmware_version(void)
 //     }
 
 //     // Test the set function
-//     TEST_ASSERT_TRUE_MESSAGE(lora->set_address(value), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->set_address(value), "Function set did not succeed");
 //     int out;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->get_address(out), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->get_address(out), "Function get did not succeed");
 //     // New value gotten must be the same as value set to
 //     TEST_ASSERT_EQUAL_INT_MESSAGE(value, out, "Set did not work");
 
 //     // Set it back to original value
-//     TEST_ASSERT_TRUE_MESSAGE(lora->set_address(original), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->set_address(original), "Function set did not succeed");
 // }
 
 // void test_channel(void)
@@ -417,7 +427,7 @@ void test_firmware_version(void)
 //     int value = 2;
 //     // Make sure to test with a different setting then the currect setting
 //     int original;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->get_channel(original), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->get_channel(original), "Function get did not succeed");
 //     // Make sure to chose a new value that is in range
 //     if (original == value)
 //     {
@@ -425,14 +435,14 @@ void test_firmware_version(void)
 //     }
 
 //     // Test the set function
-//     TEST_ASSERT_TRUE_MESSAGE(lora->set_channel(value), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->set_channel(value), "Function set did not succeed");
 //     int out;
-//     TEST_ASSERT_TRUE_MESSAGE(lora->get_channel(out), "Function get did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->get_channel(out), "Function get did not succeed");
 //     // New value gotten must be the same as value set to
 //     TEST_ASSERT_EQUAL_INT_MESSAGE(value, out, "Set did not work");
 
 //     // Set it back to original value
-//     TEST_ASSERT_TRUE_MESSAGE(lora->set_channel(original), "Function set did not succeed");
+//     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces,lora->set_channel(original), "Function set did not succeed");
 // }
 
 void test_forward_error_correction(void) {}
@@ -446,7 +456,7 @@ void test_key(void) {}
  */
 void test_print(void)
 {
-    TEST_ASSERT_TRUE_MESSAGE(lora->SendMessage("Hello world!"), "Message could not be send");
+    TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SendMessage("Hello world!"), "Message could not be send");
 }
 
 /**

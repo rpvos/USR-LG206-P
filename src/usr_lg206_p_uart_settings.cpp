@@ -4,19 +4,19 @@ LoRaUartSettings::LoRaUartSettings::LoRaUartSettings(bool usingFactorySettings)
 {
     if (usingFactorySettings)
     {
-        this->buadrate = baudrate_115200;
+        this->buadrate = Baudrate::baudrate_115200;
         this->dataBits = 8;
         this->stopBits = 1;
-        this->parity = parity_none;
-        this->flowControl = flowcontrol_485;
+        this->parity = Parity::parity_none;
+        this->flowControl = Flowcontrol::flowcontrol_485;
     }
     else
     {
-        this->buadrate = baudrate_115200;
+        this->buadrate = Baudrate::baudrate_115200;
         this->dataBits = 8;
         this->stopBits = 1;
-        this->parity = parity_none;
-        this->flowControl = flowcontrol_485;
+        this->parity = Parity::parity_none;
+        this->flowControl = Flowcontrol::flowcontrol_485;
     };
 };
 
@@ -53,7 +53,7 @@ bool LoRaUartSettings::LoRaUartSettings::operator==(const LoRaUartSettings &b) c
 
 String LoRaUartSettings::LoRaUartSettings::toString(void)
 {
-    return String(this->buadrate) + "," + String(this->dataBits) + "," + String(this->stopBits) + "," + ToString(this->parity) + "," + ToString(this->flowControl);
+    return String(ToString(this->buadrate)) + "," + String(this->dataBits) + "," + String(this->stopBits) + "," + ToString(this->parity) + "," + ToString(this->flowControl);
 };
 
 int LoRaUartSettings::LoRaUartSettings::fromString(String input)

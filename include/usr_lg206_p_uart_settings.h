@@ -4,8 +4,9 @@
 
 namespace LoRaUartSettings
 {
-    enum Baudrate
+    enum class Baudrate : long
     {
+        baudrate_undefined = -1,
         baudrate_1200 = 1200,
         baudrate_2400 = 2400,
         baudrate_4800 = 4800,
@@ -15,14 +16,14 @@ namespace LoRaUartSettings
         baudrate_57600 = 57600,
         baudrate_115200 = 115200,
     };
-    enum Parity
+    enum class Parity
     {
         parity_undefined = -1,
         parity_none = 1,
         parity_even = 2,
         parity_odd = 3,
     };
-    enum Flowcontrol
+    enum class Flowcontrol
     {
         flowcontrol_undefined = -1,
         flowcontrol_485 = 1,
@@ -54,9 +55,9 @@ namespace LoRaUartSettings
     {
         switch (flowcontrol)
         {
-        case flowcontrol_485:
+        case Flowcontrol::flowcontrol_485:
             return "485";
-        case flowcontrol_nfc:
+        case Flowcontrol::flowcontrol_nfc:
             return "NFC";
         default:
             return "Undefined flowcontrol";
@@ -66,25 +67,25 @@ namespace LoRaUartSettings
     {
         if (data == "485")
         {
-            return flowcontrol_485;
+            return Flowcontrol::flowcontrol_485;
         }
         else if (data == "NFC")
         {
-            return flowcontrol_nfc;
+            return Flowcontrol::flowcontrol_nfc;
         }
 
-        return flowcontrol_undefined;
+        return Flowcontrol::flowcontrol_undefined;
     };
 
     inline const char *ToString(Parity parity)
     {
         switch (parity)
         {
-        case parity_none:
+        case Parity::parity_none:
             return "NONE";
-        case parity_even:
+        case Parity::parity_even:
             return "EVEN";
-        case parity_odd:
+        case Parity::parity_odd:
             return "ODD";
         default:
             return "Undefined parity";
@@ -94,18 +95,79 @@ namespace LoRaUartSettings
     {
         if (data == "NONE")
         {
-            return parity_none;
+            return Parity::parity_none;
         }
         else if (data == "EVEN")
         {
-            return parity_even;
+            return Parity::parity_even;
         }
         else if (data == "ODD")
         {
-            return parity_odd;
+            return Parity::parity_odd;
         }
 
-        return parity_undefined;
+        return Parity::parity_undefined;
+    };
+    inline const char *ToString(Baudrate baudrate)
+    {
+        switch (baudrate)
+        {
+        case Baudrate::baudrate_1200:
+            return "1200";
+        case Baudrate::baudrate_2400:
+            return "2400";
+        case Baudrate::baudrate_4800:
+            return "4800";
+        case Baudrate::baudrate_9200:
+            return "9200";
+        case Baudrate::baudrate_19200:
+            return "19200";
+        case Baudrate::baudrate_38400:
+            return "38400";
+        case Baudrate::baudrate_57600:
+            return "57600";
+        case Baudrate::baudrate_115200:
+            return "115200";
+        default:
+            return "Undefined parity";
+        }
+    };
+    inline Baudrate BaudrateFromString(String data)
+    {
+        if (data == "1200")
+        {
+            return Baudrate::baudrate_1200;
+        }
+        else if (data == "2400")
+        {
+            return Baudrate::baudrate_2400;
+        }
+        else if (data == "4800")
+        {
+            return Baudrate::baudrate_4800;
+        }
+        else if (data == "9200")
+        {
+            return Baudrate::baudrate_9200;
+        }
+        else if (data == "19200")
+        {
+            return Baudrate::baudrate_19200;
+        }
+        else if (data == "38400")
+        {
+            return Baudrate::baudrate_38400;
+        }
+        else if (data == "57600")
+        {
+            return Baudrate::baudrate_57600;
+        }
+        else if (data == "115200")
+        {
+            return Baudrate::baudrate_115200;
+        }
+
+        return Baudrate::baudrate_undefined;
     };
 
 #pragma endregion helper_functions_for_enums

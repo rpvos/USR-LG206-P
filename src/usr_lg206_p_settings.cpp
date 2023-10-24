@@ -4,38 +4,38 @@ LoRaSettings::LoRaSettings::LoRaSettings(bool usingFactorySettings)
 {
     if (usingFactorySettings)
     {
-        this->at_mode = kAtModeIsOff;
-        this->command_echo_function = kEchoFunctionIsOn;
+        this->at_mode = AtMode::kAtModeIsOff;
+        this->command_echo_function = CommandEchoFunction::kCommandEchoFunctionIsOn;
         this->node_id = "";
         this->firmware_version = "";
-        this->work_mode = kWorkModeTransparent;
+        this->work_mode = WorkMode::kWorkModeTransparent;
         this->uart_ = new LoRaUartSettings::LoRaUartSettings(usingFactorySettings);
-        this->power_mode = kPowerConsumptionModeRun;
+        this->power_consumption_mode = PowerConsumptionMode::kPowerConsumptionModeRun;
         this->wake_up_interval = 2000;
-        this->lora_air_rate_level = kLoRaAirRateLevel21875;
+        this->lora_air_rate_level = LoRaAirRateLevel::kLoRaAirRateLevel21875;
         this->destination_address = 0;
         this->destination_address_is_set = true;
         this->channel = 65;
-        this->forward_error_correction = kForwardErrorCorrectionIsOff;
+        this->forward_error_correction = ForwardErrorCorrection::kForwardErrorCorrectionIsOff;
         this->transmitting_power = 20;
         this->test_interval = false;
         this->key = "FFFFFFFF";
     }
     else
     {
-        this->at_mode = kAtModeUndefined;
-        this->command_echo_function = kEchoFunctionUndefined;
+        this->at_mode = AtMode::kAtModeUndefined;
+        this->command_echo_function = CommandEchoFunction::kCommandEchoFunctionUndefined;
         this->node_id = "";
         this->firmware_version = "";
-        this->work_mode = kWorkModeUndefined;
+        this->work_mode = WorkMode::kWorkModeUndefined;
         this->uart_ = new LoRaUartSettings::LoRaUartSettings(false);
-        this->power_mode = kPowerConsumptionModeUndefined;
+        this->power_consumption_mode = PowerConsumptionMode::kPowerConsumptionModeUndefined;
         this->wake_up_interval = -1;
-        this->lora_air_rate_level = kLoRaAirRateLevelUndefined;
+        this->lora_air_rate_level = LoRaAirRateLevel::kLoRaAirRateLevelUndefined;
         this->destination_address = 0;
         this->destination_address_is_set = false;
         this->channel = -1;
-        this->forward_error_correction = kForwardErrorCorrectionUndefined;
+        this->forward_error_correction = ForwardErrorCorrection::kForwardErrorCorrectionUndefined;
         this->transmitting_power = 0;
         this->test_interval = 0;
         this->key = "";
@@ -88,7 +88,7 @@ bool LoRaSettings::LoRaSettings::operator==(const LoRaSettings &b) const
     {
         return false;
     }
-    if (this->power_mode != b.power_mode)
+    if (this->power_consumption_mode != b.power_consumption_mode)
     {
         return false;
     }
