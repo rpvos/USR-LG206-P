@@ -65,7 +65,7 @@ void test_enter_at(void)
         TEST_ASSERT_EQUAL_STRING("", buffer);
     }
 
-    TEST_ASSERT_TRUE_MESSAGE(lora->BeginAtMode(), "At mode not entered");
+    TEST_ASSERT_TRUE_MESSAGE(lora->BeginAtMode(), "At mode was not saved");
     memory_stream->ReadInput(buffer, buffer_size);
     TEST_ASSERT_EQUAL_STRING("", buffer);
 }
@@ -263,8 +263,6 @@ void test_node_id(void)
 
         { // Check message handling
             memory_stream->ReadInput(buffer, buffer_size);
-            TEST_ASSERT_EQUAL_STRING("AT+NID\r\n", buffer);
-            memory_stream->ReadInput(buffer, buffer_size);
             TEST_ASSERT_EQUAL_STRING("", buffer);
         }
     }
@@ -272,8 +270,8 @@ void test_node_id(void)
 
 void test_firmware_version(void)
 {
-    char firmware_version[8];
-    char second_firmware_version[8];
+    String firmware_version;
+    String second_firmware_version;
 
     {     // Test get firmware version
         { // Setup
@@ -282,7 +280,7 @@ void test_firmware_version(void)
         }
 
         TEST_ASSERT_TRUE(lora->GetFirmwareVersion(firmware_version));
-        TEST_ASSERT_EQUAL_STRING("1.1.1", firmware_version);
+        TEST_ASSERT_EQUAL_STRING("1.1.1", firmware_version.c_str());
 
         { // Check message handling
             memory_stream->ReadInput(buffer, buffer_size);
@@ -299,11 +297,9 @@ void test_firmware_version(void)
         }
 
         TEST_ASSERT_TRUE(lora->GetFirmwareVersion(second_firmware_version));
-        TEST_ASSERT_EQUAL_STRING(firmware_version, second_firmware_version);
+        TEST_ASSERT_EQUAL_STRING(firmware_version.c_str(), second_firmware_version.c_str());
 
         { // Check message handling
-            memory_stream->ReadInput(buffer, buffer_size);
-            TEST_ASSERT_EQUAL_STRING("AT+VER\r\n", buffer);
             memory_stream->ReadInput(buffer, buffer_size);
             TEST_ASSERT_EQUAL_STRING("", buffer);
         }

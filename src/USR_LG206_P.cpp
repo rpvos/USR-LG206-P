@@ -9,6 +9,7 @@
  *
  */
 #include "usr_lg206_p.h"
+#include <unity.h>
 
 LoRa::LoRa(RS485 *serial)
 {
@@ -45,7 +46,7 @@ int LoRa::GetSettings(OUT LoRaSettings::LoRaSettings &settings)
 int LoRa::BeginAtMode(void)
 {
     // Check if the LoRa module is already in AT mode
-    if (settings_->at_mode)
+    if (settings_->at_mode == LoRaSettings::kAtModeIsOn)
     {
         return true;
     }
@@ -53,11 +54,11 @@ int LoRa::BeginAtMode(void)
     String received_data = "";
     String sent_data = "+++";
     received_data = SendCommand(sent_data);
+    TEST_MESSAGE(received_data.c_str());
 
     String expected_data = "a";
     if (received_data.indexOf(expected_data) < 0)
     {
-        delay(1000);
         return false;
     }
 
@@ -218,7 +219,7 @@ int LoRa::GetNodeId(OUT String &node_id)
     String command = "+NID";
     String value = GetCommand(command);
 
-    if (value)
+    if (value.length())
     {
         node_id = value;
         settings_->node_id = value;
@@ -228,11 +229,11 @@ int LoRa::GetNodeId(OUT String &node_id)
     return false;
 };
 
-int LoRa::GetFirmwareVersion(OUT char *buffer)
+int LoRa::GetFirmwareVersion(OUT String &firmware_version)
 {
     if (settings_->firmware_version != "")
     {
-        memcpy(buffer, &settings_->firmware_version, settings_->firmware_version.length() + 1);
+        firmware_version = settings_->firmware_version;
         return true;
     }
 
@@ -242,7 +243,7 @@ int LoRa::GetFirmwareVersion(OUT char *buffer)
     if (value)
     {
         settings_->firmware_version = value;
-        memcpy(buffer, &settings_->firmware_version, settings_->firmware_version.length() + 1);
+        firmware_version = settings_->firmware_version;
         return true;
     }
 
@@ -800,7 +801,7 @@ int LoRa::SendMessage(uint16_t destination_address, uint8_t channel, const char 
     memcpy(message_buffer + destination_address_size + channel_size, message, message_size);
 
     size_t amount_of_bytes_written = serial_->write(message, destination_address_size + channel_size + message_size);
-    if (amount_of_bytes_written == destination_address_size + channel_size + message_size)
+    if (amount_of_bytes_written == (destination_address_size + channel_size + message_size))
     {
         // Make sure the full message is sent and set mode back to input so other messeages can be received
         serial_->flush();
@@ -876,36 +877,37 @@ int LoRa::SetCommand(String command, String succesfullResponse)
 String LoRa::GetCommand(String command, String succesfullResponse)
 {
     String returnValue = "";
-    command = "AT" + command + "\n";
-    String expected_data = command;
-    String received_data = SendCommand(command);
+    String querry = "AT" + command + "\r\n";
+    String expected_data = querry;
+    String received_data = SendCommand(querry);
 
     // If echo is enabled check for the repeated command
     if (this->settings_->command_echo_function)
     {
         String returned_command = received_data.substring(0, command.length());
-        if (returned_command != command)
+        if (returned_command != querry)
         {
             return returnValue;
         }
     }
 
-    // Check for error
-    int indexError = received_data.indexOf("ERR");
-    if (indexError != -1)
-    {
-        // On error retry
-        received_data = SendCommand(command);
-        // If echo is enabled check for the repeated command
-        if (this->settings_->command_echo_function)
-        {
-            String returned_command = received_data.substring(0, command.length());
-            if (returned_command != command)
-            {
-                return returnValue;
-            }
-        }
-    }
+    // TODO might be unnessesary
+    //  Check for error
+    // int indexError = received_data.indexOf("ERR");
+    // if (indexError != -1)
+    // {
+    //     // On error retry
+    //     received_data = SendCommand(querry);
+    //     // If echo is enabled check for the repeated command
+    //     if (this->settings_->command_echo_function)
+    //     {
+    //         String returned_command = received_data.substring(0, command.length());
+    //         if (returned_command != command)
+    //         {
+    //             return returnValue;
+    //         }
+    //     }
+    // }
 
     // Check if : is present and if OK is present
     String gottenSetting = command + ":";
@@ -918,7 +920,7 @@ String LoRa::GetCommand(String command, String succesfullResponse)
     }
 
     // Return the part containing the setting
-    return received_data.substring(index, okInResponse - 1);
+    return received_data.substring(index + gottenSetting.length(), okInResponse - String("\r\n\r\n").length());
 };
 
 #pragma endregion

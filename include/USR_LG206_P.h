@@ -122,7 +122,7 @@ public:
      * @param firmware_version output parameter
      * @return true if succesfull, false if unsuccesfull
      */
-    int GetFirmwareVersion(OUT char *buffer);
+    int GetFirmwareVersion(OUT String &firmware_version);
 
     /**
      * @brief Function used to set the workmode
