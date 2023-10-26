@@ -192,14 +192,11 @@ LoRaErrorCode LoRa::GetNodeId(OUT String &node_id)
     }
 
     String command = "+NID";
-    String value;
-    LoRaErrorCode response_code = GetCommand(command, value);
+    LoRaErrorCode response_code = GetCommand(command, node_id);
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        node_id = value;
-        settings_->node_id = value;
-        return LoRaErrorCode::kSucces;
+        settings_->node_id = node_id;
     }
 
     return response_code;
@@ -207,19 +204,18 @@ LoRaErrorCode LoRa::GetNodeId(OUT String &node_id)
 
 LoRaErrorCode LoRa::GetFirmwareVersion(OUT String &setting)
 {
-    if (settings_->firmware_version != "")
+    if (settings_->firmware_version.length())
     {
         setting = settings_->firmware_version;
         return LoRaErrorCode::kSucces;
     }
 
     String command = "+VER";
-    String value;
-    LoRaErrorCode response_code = GetCommand(command, value);
+    LoRaErrorCode response_code = GetCommand(command, setting);
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->firmware_version = value;
+        settings_->firmware_version = setting;
     }
 
     return response_code;
