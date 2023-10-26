@@ -179,7 +179,7 @@ public:
      * @param wake_up_interval 500-4000 in ms
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode set_waking_up_interval(int setting);
+    LoRaErrorCode SetWakingUpInterval(int setting = 2000);
 
     /**
      * @brief Get the waking up interval
@@ -187,7 +187,7 @@ public:
      * @param wake_up_interval in ms
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode get_waking_up_interval(OUT int &setting);
+    LoRaErrorCode GetWakingUpInterval(OUT int &setting);
 
     /**
      * @brief Function used to set the LoRa air rate level
@@ -195,7 +195,7 @@ public:
      * @param speed value for air rate in bits per second
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode set_speed(LoRaSettings::LoRaAirRateLevel setting = LoRaSettings::LoRaAirRateLevel::kLoRaAirRateLevel21875);
+    LoRaErrorCode SetAirRateLevel(LoRaSettings::LoRaAirRateLevel setting = LoRaSettings::LoRaAirRateLevel::kLoRaAirRateLevel21875);
 
     /**
      * @brief Function used to set the LoRa air rate level
@@ -203,7 +203,7 @@ public:
      * @param speed value for air rate in bits per second
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode get_speed(LoRaSettings::LoRaAirRateLevel &setting);
+    LoRaErrorCode GetAirRateLevel(LoRaSettings::LoRaAirRateLevel &setting);
 
     /**
      * @brief Function used to set the destination address
@@ -211,7 +211,7 @@ public:
      * @param address value between 0-65535 where 65535 a broadcast address is
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode set_address(int address);
+    LoRaErrorCode SetDestinationAddress(int address = 0);
 
     /**
      * @brief Function used to set the destination address
@@ -219,27 +219,11 @@ public:
      * @param OUTPUT address value between 0-65535 where 65535 a broadcast address is
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode get_address(OUT int &address);
+    LoRaErrorCode GetDestinationAddress(OUT int &address);
 
-    /**
-     * @brief Function used to get the LoRa air rate level
-     *
-     * @param channel value for channel is as following values in the following ranges
-     *  L: 0~127 Working frequency band=(398+ch)MHz (Default is 72, frequency band 470Mhz)
-     *  H: 0~127 Working frequency band=(803+ch)Mhz (Default is 65, frequency band 868Mhz)
-     * @return true if succesfull, false if unsuccesfull
-     */
-    LoRaErrorCode set_channel(int channel);
+    LoRaErrorCode SetChannel(int channel = 72);
 
-    /**
-     * @brief Function used to get the LoRa air rate level
-     *
-     * @param OUTPUT channel value for channel is as following values in the following ranges
-     *  L: 0~127 Working frequency band=(398+ch)MHz (Default is 72, frequency band 470Mhz)
-     *  H: 0~127 Working frequency band=(803+ch)Mhz (Default is 65, frequency band 868Mhz)
-     * @return true if succesfull, false if unsuccesfull
-     */
-    LoRaErrorCode get_channel(OUT int &channel);
+    LoRaErrorCode GetChannel(OUT int &channel);
 
     /**
      * @brief Set the forward error correction on or off
@@ -247,7 +231,7 @@ public:
      * @param isOn true for forward error correction turned on and false for turned off
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode set_forward_error_correction(LoRaSettings::ForwardErrorCorrection setting = LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOff);
+    LoRaErrorCode SetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection setting = LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOff);
 
     /**
      * @brief Get the forward error correction value
@@ -255,7 +239,7 @@ public:
      * @param isOn OUTPUT true for forward error correction turned on and false for turned off
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode get_forward_error_correction(LoRaSettings::ForwardErrorCorrection &setting);
+    LoRaErrorCode GetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection &setting);
 
     /**
      * @brief Set the power transmission value
@@ -263,7 +247,7 @@ public:
      * @param power Amount of power in dBm (10~20)
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode set_power_transmission_value(int power = 20);
+    LoRaErrorCode SetPowerTransmissionValue(int power = 20);
 
     /**
      * @brief Set the power transmission value
@@ -271,7 +255,7 @@ public:
      * @param power OUTPUT Amount of power in dBm (10~20)
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode get_power_transmission_value(OUT int &power);
+    LoRaErrorCode GetPowerTransmissionValue(OUT int &power);
 
     /**
      * @brief Set the transmission interval of test data being sent

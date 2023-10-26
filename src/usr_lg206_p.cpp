@@ -102,6 +102,11 @@ LoRaErrorCode LoRa::EndAtMode(void)
 
 LoRaErrorCode LoRa::SetEcho(LoRaSettings::CommandEchoFunction setting)
 {
+    if (setting == settings_->command_echo_function)
+    {
+        return LoRaErrorCode::kSucces;
+    }
+
     String command = "+E=";
     if (setting == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)
     {
@@ -223,6 +228,11 @@ LoRaErrorCode LoRa::GetFirmwareVersion(OUT String &setting)
 
 LoRaErrorCode LoRa::SetWorkMode(LoRaSettings::WorkMode setting)
 {
+    if (setting == settings_->work_mode)
+    {
+        return LoRaErrorCode::kSucces;
+    }
+
     String command = "+WMODE=";
     if (setting == LoRaSettings::WorkMode::kWorkModeTransparent)
     {
@@ -322,6 +332,11 @@ LoRaErrorCode LoRa::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *sett
 
 LoRaErrorCode LoRa::SetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode setting)
 {
+    if (setting == settings_->power_consumption_mode)
+    {
+        return LoRaErrorCode::kSucces;
+    }
+
     String command = "+PMODE=";
     if (setting == LoRaSettings::PowerConsumptionMode::kPowerConsumptionModeRun)
     {
@@ -375,8 +390,13 @@ LoRaErrorCode LoRa::GetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode &
     return response_code;
 };
 
-LoRaErrorCode LoRa::set_waking_up_interval(int setting = 2000)
+LoRaErrorCode LoRa::SetWakingUpInterval(int setting)
 {
+    if (setting == settings_->wake_up_interval)
+    {
+        return LoRaErrorCode::kSucces;
+    }
+
     String command = "+WTM=";
     if (500 <= setting && setting <= 4000)
     {
@@ -397,7 +417,7 @@ LoRaErrorCode LoRa::set_waking_up_interval(int setting = 2000)
     return response_code;
 };
 
-LoRaErrorCode LoRa::get_waking_up_interval(OUT int &setting)
+LoRaErrorCode LoRa::GetWakingUpInterval(OUT int &setting)
 {
     if (settings_->wake_up_interval != -1)
     {
@@ -418,14 +438,20 @@ LoRaErrorCode LoRa::get_waking_up_interval(OUT int &setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::set_speed(LoRaSettings::LoRaAirRateLevel setting)
+LoRaErrorCode LoRa::SetAirRateLevel(LoRaSettings::LoRaAirRateLevel setting)
 {
-    String command = "+SPD=";
+    if (setting == settings_->lora_air_rate_level)
+    {
+        return LoRaErrorCode::kSucces;
+    }
+
     if (setting == LoRaSettings::LoRaAirRateLevel::kLoRaAirRateLevelUndefined)
     {
         return LoRaErrorCode::kInvalidParameter;
     }
 
+    String command = "+SPD=";
+    command += static_cast<int>(setting);
     LoRaErrorCode response_code = SetCommand(command);
 
     if (response_code == LoRaErrorCode::kSucces)
@@ -436,7 +462,7 @@ LoRaErrorCode LoRa::set_speed(LoRaSettings::LoRaAirRateLevel setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::get_speed(LoRaSettings::LoRaAirRateLevel &setting)
+LoRaErrorCode LoRa::GetAirRateLevel(LoRaSettings::LoRaAirRateLevel &setting)
 {
     if (settings_->lora_air_rate_level != LoRaSettings::LoRaAirRateLevel::kLoRaAirRateLevelUndefined)
     {
@@ -457,8 +483,13 @@ LoRaErrorCode LoRa::get_speed(LoRaSettings::LoRaAirRateLevel &setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::set_address(int address = 0)
+LoRaErrorCode LoRa::SetDestinationAddress(int address)
 {
+    if (address == settings_->destination_address)
+    {
+        return LoRaErrorCode::kSucces;
+    }
+
     String command = "+ADDR=";
     if (0 <= address && address <= 65535)
     {
@@ -480,7 +511,7 @@ LoRaErrorCode LoRa::set_address(int address = 0)
     return response_code;
 };
 
-LoRaErrorCode LoRa::get_address(OUT int &address)
+LoRaErrorCode LoRa::GetDestinationAddress(OUT int &address)
 {
     if (settings_->destination_address_is_set)
     {
@@ -502,8 +533,13 @@ LoRaErrorCode LoRa::get_address(OUT int &address)
     return response_code;
 }
 
-LoRaErrorCode LoRa::set_channel(int channel)
+LoRaErrorCode LoRa::SetChannel(int channel)
 {
+    if (channel == settings_->channel)
+    {
+        return LoRaErrorCode::kSucces;
+    }
+
     String command = "+CH=";
     if (0 <= channel && channel <= 127)
     {
@@ -524,7 +560,7 @@ LoRaErrorCode LoRa::set_channel(int channel)
     return response_code;
 };
 
-LoRaErrorCode LoRa::get_channel(OUT int &channel)
+LoRaErrorCode LoRa::GetChannel(OUT int &channel)
 {
     if (settings_->channel != -1)
     {
@@ -545,8 +581,12 @@ LoRaErrorCode LoRa::get_channel(OUT int &channel)
     return response_code;
 };
 
-LoRaErrorCode LoRa::set_forward_error_correction(LoRaSettings::ForwardErrorCorrection setting)
+LoRaErrorCode LoRa::SetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection setting)
 {
+    if (setting == settings_->forward_error_correction)
+    {
+        return LoRaErrorCode::kSucces;
+    }
 
     String command = "+FEC=";
     if (setting == LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOn)
@@ -572,7 +612,7 @@ LoRaErrorCode LoRa::set_forward_error_correction(LoRaSettings::ForwardErrorCorre
     return response_code;
 }
 
-LoRaErrorCode LoRa::get_forward_error_correction(LoRaSettings::ForwardErrorCorrection &setting)
+LoRaErrorCode LoRa::GetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection &setting)
 {
     if (settings_->forward_error_correction != LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionUndefined)
     {
@@ -586,20 +626,21 @@ LoRaErrorCode LoRa::get_forward_error_correction(LoRaSettings::ForwardErrorCorre
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        if (value == "ON")
+        if (value.indexOf("ON") != -1)
         {
             settings_->forward_error_correction = LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOn;
         }
-        else if (value == "OFF")
+        else if (value.indexOf("OFF") != -1)
         {
             settings_->forward_error_correction = LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOff;
         }
+        setting = settings_->forward_error_correction;
     }
 
     return response_code;
 }
 
-LoRaErrorCode LoRa::set_power_transmission_value(int setting)
+LoRaErrorCode LoRa::SetPowerTransmissionValue(int setting)
 {
     String command = "+PWR=";
     if (10 <= setting && setting <= 20)
@@ -621,7 +662,7 @@ LoRaErrorCode LoRa::set_power_transmission_value(int setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::get_power_transmission_value(OUT int &setting)
+LoRaErrorCode LoRa::GetPowerTransmissionValue(OUT int &setting)
 {
 
     if (settings_->transmitting_power != 0)
@@ -689,7 +730,7 @@ LoRaErrorCode LoRa::get_transmission_interval(OUT int &setting)
 LoRaErrorCode LoRa::SetKey(String key)
 {
     String command = "+KEY=";
-    if (key.length() == 8)
+    if (key.length() == 16)
     {
         command += key;
     }
