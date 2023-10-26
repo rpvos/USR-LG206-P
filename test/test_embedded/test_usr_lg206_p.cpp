@@ -490,7 +490,7 @@ void test_powermode(void)
     }
 }
 
-void test_wake_up_interval(void)
+void test_waking_up_interval(void)
 {
     int value;
     {     // Test initial state
@@ -1021,16 +1021,18 @@ void test_power_transmission_value(void)
 
 void test_transmission_interval(void)
 {
-    int value;
     {     // Test initial state
         { // Setup
-            String response1 = String("\r\nAT+SQT\r\n\r\nADDR:0 SNR:8 RSSI:-15.742600\r\n\r\nOK\r\n");
+            String response1 = String("\r\nAT+SQT\r\n");
             memory_stream->AddOutput(response1.c_str(), response1.length());
+            String response2 = String("\r\nADDR:0 SNR:8 RSSI:-15.742600\r\n");
+            memory_stream->AddOutput(response2.c_str(), response2.length());
         }
 
-        TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->get_transmission_interval(value), "Function get did not succeed");
-        // Make sure it defaults to 20
-        TEST_ASSERT_EQUAL_STRING("ADDR:0 SNR:8 RSSI:-15.742600", value);
+        TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->QueryTransmissionInterval(), "Function get did not succeed");
+        String value = lora->ReceiveMessage();
+        value.trim();
+        TEST_ASSERT_EQUAL_STRING("ADDR:0 SNR:8 RSSI:-15.742600", value.c_str());
 
         { // Check sent message
             memory_stream->ReadInput(buffer, buffer_size);
@@ -1040,71 +1042,27 @@ void test_transmission_interval(void)
         }
     }
 
-    // {     //  Test the set function
-    //     { // Setup
-    //         String response1 = String("\r\nAT+PWR=10\r\n\r\n\r\nOK\r\n");
-    //         memory_stream->AddOutput(response1.c_str(), response1.length());
-    //     }
+    {     //  Test the set function
+        { // Setup
+            String response1 = String("\r\nAT+SQT=500\r\n\r\n\r\nOK\r\n");
+            memory_stream->AddOutput(response1.c_str(), response1.length());
+            String response2 = String("\r\nADDR:0 SNR:8 RSSI:-15.742600\r\n");
+            memory_stream->AddOutput(response2.c_str(), response2.length());
+            String response3 = String("\r\nADDR:0 SNR:8 RSSI:-15.742600\r\n");
+            memory_stream->AddOutput(response3.c_str(), response3.length());
+        }
 
-    //     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SetPowerTransmissionValue(10), "Function set did not succeed");
-    //     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->GetPowerTransmissionValue(value), "Function get did not succeed");
-    //     TEST_ASSERT_EQUAL_INT(10, value);
+        TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SetTransmissionInterval(500), "Function set did not succeed");
+        TEST_ASSERT_EQUAL_STRING("\r\nADDR:0 SNR:8 RSSI:-15.742600\r\n", lora->ReceiveMessage().c_str());
+        TEST_ASSERT_EQUAL_STRING("\r\nADDR:0 SNR:8 RSSI:-15.742600\r\n", lora->ReceiveMessage().c_str());
 
-    //     { // Check sent message
-    //         memory_stream->ReadInput(buffer, buffer_size);
-    //         TEST_ASSERT_EQUAL_STRING("AT+PWR=10\r\n", buffer);
-    //         memory_stream->ReadInput(buffer, buffer_size);
-    //         TEST_ASSERT_EQUAL_STRING("", buffer);
-    //     }
-    // }
-
-    // {     //  Test the set function
-    //     { // Setup
-    //     }
-
-    //     // Set when it is already set test
-    //     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SetPowerTransmissionValue(value), "Function set did not succeed");
-    //     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->GetPowerTransmissionValue(value), "Function get did not succeed");
-    //     TEST_ASSERT_EQUAL_INT(10, value);
-
-    //     { // Check sent message
-    //         memory_stream->ReadInput(buffer, buffer_size);
-    //         TEST_ASSERT_EQUAL_STRING("", buffer);
-    //     }
-    // }
-
-    // {     // Test set transparent
-    //     { // Setup
-    //         String response1 = String("\r\nAT+PWR=20\r\n\r\n\r\nOK\r\n");
-    //         memory_stream->AddOutput(response1.c_str(), response1.length());
-    //     }
-
-    //     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SetPowerTransmissionValue(20), "Function set did not succeed");
-    //     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->GetPowerTransmissionValue(value), "Function get did not succeed");
-    //     TEST_ASSERT_EQUAL_INT(20, value);
-
-    //     { // Check sent message
-    //         memory_stream->ReadInput(buffer, buffer_size);
-    //         TEST_ASSERT_EQUAL_STRING("AT+PWR=20\r\n", buffer);
-    //         memory_stream->ReadInput(buffer, buffer_size);
-    //         TEST_ASSERT_EQUAL_STRING("", buffer);
-    //     }
-    // }
-
-    // {     // Test when value already is set
-    //     { // Setup
-    //     }
-
-    //     // Set when it is already set test
-    //     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SetPowerTransmissionValue(value), "Function set did not succeed");
-    //     TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->GetPowerTransmissionValue(value), "Function get did not succeed");
-    //     TEST_ASSERT_EQUAL_INT(20, value);
-
-    //     { // Check sent message
-    //         memory_stream->ReadInput(buffer, buffer_size);
-    //         TEST_ASSERT_EQUAL_STRING("", buffer);
-    //     }
-    // }
+        { // Check sent message
+            memory_stream->ReadInput(buffer, buffer_size);
+            TEST_ASSERT_EQUAL_STRING("AT+SQT=500\r\n", buffer);
+            memory_stream->ReadInput(buffer, buffer_size);
+            TEST_ASSERT_EQUAL_STRING("", buffer);
+        }
+    }
 }
 void test_key(void)
 {
@@ -1162,7 +1120,7 @@ void test_set_and_get(void)
     RUN_TEST(test_firmware_version);
     RUN_TEST(test_wmode);
     RUN_TEST(test_powermode);
-    RUN_TEST(test_wake_up_interval);
+    RUN_TEST(test_waking_up_interval);
     RUN_TEST(test_air_rate_level);
     RUN_TEST(test_address);
     RUN_TEST(test_channel);

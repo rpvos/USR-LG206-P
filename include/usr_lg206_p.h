@@ -259,18 +259,17 @@ public:
 
     /**
      * @brief Set the transmission interval of test data being sent
-     *  //TODO send interval
-     * @return true if succesfull, false if unsuccesfull
+     *
+     * @return LoRaErrorCode
      */
-    LoRaErrorCode set_transmission_interval(int interval);
+    LoRaErrorCode SetTransmissionInterval(int interval);
 
     /**
-     * @brief Get the transmission interval of test data being sent
-     * // TODO receive interval
+     * @brief Query transmission interval of test data being received
      *
-     * @return true if succesfull, false if unsuccesfull
+     * @return LoRaErrorCode
      */
-    LoRaErrorCode get_transmission_interval(OUT int &interval);
+    LoRaErrorCode QueryTransmissionInterval();
 
     /**
      * @brief Set the key to encrypt the data transmission with

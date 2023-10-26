@@ -684,7 +684,7 @@ LoRaErrorCode LoRa::GetPowerTransmissionValue(OUT int &setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::set_transmission_interval(int interval = 2000)
+LoRaErrorCode LoRa::SetTransmissionInterval(int interval = 2000)
 {
     String command = "+SQT=";
     if ((100 <= interval && interval <= 6000) || false)
@@ -706,25 +706,30 @@ LoRaErrorCode LoRa::set_transmission_interval(int interval = 2000)
     return response_code;
 };
 
-LoRaErrorCode LoRa::get_transmission_interval(OUT int &setting)
+LoRaErrorCode LoRa::QueryTransmissionInterval()
 {
-    if (settings_->test_interval != 0)
+    String returnValue = "";
+    String querry = "AT+SQT\r\n";
+    String expected_data = querry;
+    String received_data = SendCommand(querry);
+
+    // If echo is enabled check for the repeated command
+    if (this->settings_->command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)
     {
-        setting = settings_->test_interval;
-        return LoRaErrorCode::kSucces;
+        if (received_data.indexOf(querry) == -1)
+        {
+            return LoRaErrorCode::kCommandEchoNotReceived;
+        }
     }
 
-    String command = "+SQT";
-    String value;
-    LoRaErrorCode response_code = GetCommand(command, value);
-
-    if (response_code == LoRaErrorCode::kSucces)
+    int indexError = received_data.indexOf("ERR");
+    if (indexError != -1)
     {
-        setting = value.toInt();
-        settings_->test_interval = setting;
+        int error = received_data.substring(indexError + 4, indexError + 5).toInt();
+        return LoRaErrorCode(error);
     }
 
-    return response_code;
+    return LoRaErrorCode::kSucces;
 };
 
 LoRaErrorCode LoRa::SetKey(String key)
