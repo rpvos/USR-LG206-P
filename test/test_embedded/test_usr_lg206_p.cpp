@@ -285,7 +285,6 @@ void test_firmware_version(void)
             memory_stream->AddOutput(response1.c_str(), response1.length());
         }
 
-        // TODO fix get firmware version
         LoRaErrorCode response_code = lora->GetFirmwareVersion(firmware_version);
         TEST_ASSERT_EQUAL(LoRaErrorCode::kSucces, response_code);
         TEST_ASSERT_EQUAL_STRING("1.1.1", firmware_version.c_str());
@@ -1154,10 +1153,6 @@ void setup()
     RunAllTests();
 
     UNITY_END(); // Stop unit testing
-
-    delete lora;
-    delete rs;
-    Serial1.end();
 }
 
 /**
