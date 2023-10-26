@@ -1046,10 +1046,6 @@ void test_transmission_interval(void)
         { // Setup
             String response1 = String("\r\nAT+SQT=500\r\n\r\n\r\nOK\r\n");
             memory_stream->AddOutput(response1.c_str(), response1.length());
-            String response2 = String("\r\nADDR:0 SNR:8 RSSI:-15.742600\r\n");
-            memory_stream->AddOutput(response2.c_str(), response2.length());
-            String response3 = String("\r\nADDR:0 SNR:8 RSSI:-15.742600\r\n");
-            memory_stream->AddOutput(response3.c_str(), response3.length());
         }
 
         TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SetTransmissionInterval(500), "Function set did not succeed");
