@@ -13,7 +13,7 @@ void test_setup(LoRa *lora)
     settings.destination_address = 1;
     settings.destination_address_is_set = true;
 
-    TEST_ASSERT_TRUE_MESSAGE(lora->SetSettings(&settings), "Set settings was not succesfull");
+    TEST_ASSERT_EQUAL_MESSAGE(LoRaErrorCode::kSucces, lora->SetSettings(&settings), "Set settings was not succesfull");
 
     String message = "Hello World!";
     int bytes_written = lora->SendMessage(message.c_str());

@@ -13,7 +13,7 @@
 #define USR_LG_206P_H_
 
 #include <Arduino.h>
-#include <MAX485TTL.h>
+#include <MAX485TTL.hpp>
 
 #include "usr_lg206_p_error_code.h"
 #include "usr_lg206_p_settings.h"
@@ -37,7 +37,7 @@ public:
      *
      * @param serial the stream to which data needs to be sent to communicate with the module
      */
-    explicit LoRa(RS485 *serial);
+    LoRa(RS485 *serial);
 
     /**
      * @brief Destroy the LoRa object
@@ -52,10 +52,10 @@ public:
      */
     LoRaErrorCode FactoryReset(void);
 
-    // TODO
-    LoRaErrorCode SetSettings(LoRaSettings::LoRaSettings *settings);
+    // TODO set settings
+    LoRaErrorCode SetSettings(LoRaSettings::LoRaSettings settings);
 
-    // TODO
+    // TODO get settings
     LoRaErrorCode GetSettings(OUT LoRaSettings::LoRaSettings &settings);
 
     /**
@@ -211,7 +211,7 @@ public:
      * @param address value between 0-65535 where 65535 a broadcast address is
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode SetDestinationAddress(int address = 0);
+    LoRaErrorCode SetDestinationAddress(const uint16_t address = 0);
 
     /**
      * @brief Function used to set the destination address
@@ -262,7 +262,7 @@ public:
      *
      * @return LoRaErrorCode
      */
-    LoRaErrorCode SetTransmissionInterval(int interval);
+    LoRaErrorCode SetTransmissionInterval(int interval = 2000);
 
     /**
      * @brief Query transmission interval of test data being received
@@ -292,18 +292,20 @@ public:
      * @param message data that needs to be send
      * @return amount of bytes written
      */
-    int SendMessage(const char *message);
+    int SendMessage(const uint8_t *message, size_t length);
+
+    int SendMessage(const char *const message, const size_t length);
 
     /**
      * @brief Function used to send data when fixed point is enabled
      *
-     * @param destination_address of the other module
-     * @param channel of the other module
      * @param message data that needs to be received
      * @param message_size is the size of data
+     * @param destination_address of the other module
+     * @param channel of the other module
      * @return int amount of bytes written
      */
-    int SendMessage(uint16_t destination_address, uint8_t channel, const char *message, uint8_t message_size);
+    int SendMessage(const char *message, const size_t message_size, const uint16_t destination_address, const uint8_t channel);
 
 private:
     /**
@@ -316,7 +318,7 @@ private:
      * @brief Object to keep the settings of the LoRa module
      * This is to counter frequent calls
      */
-    LoRaSettings::LoRaSettings *settings_;
+    LoRaSettings::LoRaSettings settings_;
 
     /**
      * @brief Function used to set the value on the LoRa module

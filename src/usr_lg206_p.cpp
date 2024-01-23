@@ -9,29 +9,27 @@
  *
  */
 #include "usr_lg206_p.h"
-#include <unity.h>
+#include <Arduino.h>
 
 LoRa::LoRa(RS485 *serial)
 {
     this->serial_ = serial;
-    this->settings_ = new LoRaSettings::LoRaSettings(false);
+    this->settings_ = LoRaSettings::LoRaSettings(false);
 };
 
 LoRa::~LoRa(void)
 {
     this->serial_ = nullptr;
-    delete this->settings_;
 };
 
 LoRaErrorCode LoRa::FactoryReset(void)
 {
     LoRaSettings::LoRaSettings factory_settings = LoRaSettings::LoRaSettings(true);
-    return SetSettings(&factory_settings);
+    return SetSettings(factory_settings);
 };
 
-LoRaErrorCode LoRa::SetSettings(LoRaSettings::LoRaSettings *settings)
+LoRaErrorCode LoRa::SetSettings(LoRaSettings::LoRaSettings settings)
 {
-    delete this->settings_;
     this->settings_ = settings;
     // TODO add setter for every setting
     return LoRaErrorCode::kNoResponse;
@@ -40,13 +38,14 @@ LoRaErrorCode LoRa::SetSettings(LoRaSettings::LoRaSettings *settings)
 LoRaErrorCode LoRa::GetSettings(OUT LoRaSettings::LoRaSettings &settings)
 {
     // TODO use getter for every setting
+
     return LoRaErrorCode::kNoResponse;
 }
 
 LoRaErrorCode LoRa::BeginAtMode(void)
 {
     // Check if the LoRa module is already in AT mode
-    if (settings_->at_mode == LoRaSettings::AtMode::kAtModeIsOn)
+    if (settings_.at_mode == LoRaSettings::AtMode::kAtModeIsOn)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -78,14 +77,14 @@ LoRaErrorCode LoRa::BeginAtMode(void)
         return LoRaErrorCode::kInvalidResponse;
     }
 
-    settings_->at_mode = LoRaSettings::AtMode::kAtModeIsOn;
+    settings_.at_mode = LoRaSettings::AtMode::kAtModeIsOn;
     return LoRaErrorCode::kSucces;
 };
 
 LoRaErrorCode LoRa::EndAtMode(void)
 {
     // Check if LoRa module was already out of AT mode
-    if (settings_->at_mode == LoRaSettings::AtMode::kAtModeIsOff)
+    if (settings_.at_mode == LoRaSettings::AtMode::kAtModeIsOff)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -95,14 +94,14 @@ LoRaErrorCode LoRa::EndAtMode(void)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->at_mode = LoRaSettings::AtMode::kAtModeIsOff;
+        settings_.at_mode = LoRaSettings::AtMode::kAtModeIsOff;
     }
     return response_code;
 };
 
 LoRaErrorCode LoRa::SetEcho(LoRaSettings::CommandEchoFunction setting)
 {
-    if (setting == settings_->command_echo_function)
+    if (setting == settings_.command_echo_function)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -125,7 +124,7 @@ LoRaErrorCode LoRa::SetEcho(LoRaSettings::CommandEchoFunction setting)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->command_echo_function = setting;
+        settings_.command_echo_function = setting;
     }
 
     return response_code;
@@ -133,9 +132,9 @@ LoRaErrorCode LoRa::SetEcho(LoRaSettings::CommandEchoFunction setting)
 
 LoRaErrorCode LoRa::GetEcho(LoRaSettings::CommandEchoFunction &setting)
 {
-    if (settings_->command_echo_function != LoRaSettings::CommandEchoFunction::kCommandEchoFunctionUndefined)
+    if (settings_.command_echo_function != LoRaSettings::CommandEchoFunction::kCommandEchoFunctionUndefined)
     {
-        setting = settings_->command_echo_function;
+        setting = settings_.command_echo_function;
         return LoRaErrorCode::kSucces;
     }
 
@@ -147,13 +146,13 @@ LoRaErrorCode LoRa::GetEcho(LoRaSettings::CommandEchoFunction &setting)
     {
         if (value.indexOf("ON") != -1)
         {
-            settings_->command_echo_function = LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn;
-            setting = settings_->command_echo_function;
+            settings_.command_echo_function = LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn;
+            setting = settings_.command_echo_function;
         }
         else if (value.indexOf("OFF") != -1)
         {
-            settings_->command_echo_function = LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOff;
-            setting = settings_->command_echo_function;
+            settings_.command_echo_function = LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOff;
+            setting = settings_.command_echo_function;
         }
     }
 
@@ -169,7 +168,7 @@ LoRaErrorCode LoRa::Restart(void)
 
     if (response == LoRaErrorCode::kSucces)
     {
-        settings_->at_mode = LoRaSettings::AtMode::kAtModeIsOff;
+        settings_.at_mode = LoRaSettings::AtMode::kAtModeIsOff;
     }
 
     return response;
@@ -190,9 +189,9 @@ LoRaErrorCode LoRa::ResetToDefault(void)
 
 LoRaErrorCode LoRa::GetNodeId(OUT String &node_id)
 {
-    if (settings_->node_id != "")
+    if (settings_.node_id != "")
     {
-        node_id = settings_->node_id;
+        node_id = settings_.node_id;
         return LoRaErrorCode::kSucces;
     }
 
@@ -201,7 +200,7 @@ LoRaErrorCode LoRa::GetNodeId(OUT String &node_id)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->node_id = node_id;
+        settings_.node_id = node_id;
     }
 
     return response_code;
@@ -209,9 +208,9 @@ LoRaErrorCode LoRa::GetNodeId(OUT String &node_id)
 
 LoRaErrorCode LoRa::GetFirmwareVersion(OUT String &setting)
 {
-    if (settings_->firmware_version.length())
+    if (settings_.firmware_version.length())
     {
-        setting = settings_->firmware_version;
+        setting = settings_.firmware_version;
         return LoRaErrorCode::kSucces;
     }
 
@@ -220,7 +219,7 @@ LoRaErrorCode LoRa::GetFirmwareVersion(OUT String &setting)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->firmware_version = setting;
+        settings_.firmware_version = setting;
     }
 
     return response_code;
@@ -228,7 +227,7 @@ LoRaErrorCode LoRa::GetFirmwareVersion(OUT String &setting)
 
 LoRaErrorCode LoRa::SetWorkMode(LoRaSettings::WorkMode setting)
 {
-    if (setting == settings_->work_mode)
+    if (setting == settings_.work_mode)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -252,7 +251,7 @@ LoRaErrorCode LoRa::SetWorkMode(LoRaSettings::WorkMode setting)
     // If the set command was done succesfull
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->work_mode = setting;
+        settings_.work_mode = setting;
     }
 
     return response_code;
@@ -260,9 +259,9 @@ LoRaErrorCode LoRa::SetWorkMode(LoRaSettings::WorkMode setting)
 
 LoRaErrorCode LoRa::GetWorkMode(LoRaSettings::WorkMode &setting)
 {
-    if (settings_->work_mode != LoRaSettings::WorkMode::kWorkModeUndefined)
+    if (settings_.work_mode != LoRaSettings::WorkMode::kWorkModeUndefined)
     {
-        setting = settings_->work_mode;
+        setting = settings_.work_mode;
         return LoRaErrorCode::kSucces;
     }
 
@@ -274,13 +273,13 @@ LoRaErrorCode LoRa::GetWorkMode(LoRaSettings::WorkMode &setting)
     {
         if (value.indexOf("TRANS") != -1)
         {
-            settings_->work_mode = LoRaSettings::WorkMode::kWorkModeTransparent;
-            setting = settings_->work_mode;
+            settings_.work_mode = LoRaSettings::WorkMode::kWorkModeTransparent;
+            setting = settings_.work_mode;
         }
         else if (value.indexOf("FP") != -1)
         {
-            settings_->work_mode = LoRaSettings::WorkMode::kWorkModeFixedPoint;
-            setting = settings_->work_mode;
+            settings_.work_mode = LoRaSettings::WorkMode::kWorkModeFixedPoint;
+            setting = settings_.work_mode;
         }
     }
 
@@ -303,7 +302,7 @@ LoRaErrorCode LoRa::SetUartSettings(LoRaUartSettings::LoRaUartSettings *setting)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->SetUartSettings(setting);
+        settings_.SetUartSettings(setting);
     }
 
     return response_code;
@@ -311,9 +310,9 @@ LoRaErrorCode LoRa::SetUartSettings(LoRaUartSettings::LoRaUartSettings *setting)
 
 LoRaErrorCode LoRa::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *setting)
 {
-    if (settings_->GetUartSettings() != 0)
+    if (settings_.GetUartSettings() != 0)
     {
-        setting = settings_->GetUartSettings();
+        setting = settings_.GetUartSettings();
         return LoRaErrorCode::kSucces;
     }
 
@@ -324,7 +323,7 @@ LoRaErrorCode LoRa::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *sett
     if (response_code == LoRaErrorCode::kSucces)
     {
         setting->fromString(value);
-        settings_->SetUartSettings(setting);
+        settings_.SetUartSettings(setting);
     }
 
     return response_code;
@@ -332,7 +331,7 @@ LoRaErrorCode LoRa::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *sett
 
 LoRaErrorCode LoRa::SetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode setting)
 {
-    if (setting == settings_->power_consumption_mode)
+    if (setting == settings_.power_consumption_mode)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -355,7 +354,7 @@ LoRaErrorCode LoRa::SetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode s
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->power_consumption_mode = setting;
+        settings_.power_consumption_mode = setting;
     }
 
     return response_code;
@@ -363,9 +362,9 @@ LoRaErrorCode LoRa::SetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode s
 
 LoRaErrorCode LoRa::GetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode &setting)
 {
-    if (settings_->power_consumption_mode != LoRaSettings::PowerConsumptionMode::kPowerConsumptionModeUndefined)
+    if (settings_.power_consumption_mode != LoRaSettings::PowerConsumptionMode::kPowerConsumptionModeUndefined)
     {
-        setting = settings_->power_consumption_mode;
+        setting = settings_.power_consumption_mode;
         return LoRaErrorCode::kSucces;
     }
 
@@ -377,13 +376,13 @@ LoRaErrorCode LoRa::GetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode &
     {
         if (value.indexOf("RUN") != -1)
         {
-            settings_->power_consumption_mode = LoRaSettings::PowerConsumptionMode::kPowerConsumptionModeRun;
-            setting = settings_->power_consumption_mode;
+            settings_.power_consumption_mode = LoRaSettings::PowerConsumptionMode::kPowerConsumptionModeRun;
+            setting = settings_.power_consumption_mode;
         }
         else if (value.indexOf("WU") != -1)
         {
-            settings_->power_consumption_mode = LoRaSettings::PowerConsumptionMode::kPowerConsumptionModeWakeUp;
-            setting = settings_->power_consumption_mode;
+            settings_.power_consumption_mode = LoRaSettings::PowerConsumptionMode::kPowerConsumptionModeWakeUp;
+            setting = settings_.power_consumption_mode;
         }
     }
 
@@ -392,7 +391,7 @@ LoRaErrorCode LoRa::GetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode &
 
 LoRaErrorCode LoRa::SetWakingUpInterval(int setting)
 {
-    if (setting == settings_->wake_up_interval)
+    if (setting == settings_.wake_up_interval)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -411,7 +410,7 @@ LoRaErrorCode LoRa::SetWakingUpInterval(int setting)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->wake_up_interval = setting;
+        settings_.wake_up_interval = setting;
     }
 
     return response_code;
@@ -419,9 +418,9 @@ LoRaErrorCode LoRa::SetWakingUpInterval(int setting)
 
 LoRaErrorCode LoRa::GetWakingUpInterval(OUT int &setting)
 {
-    if (settings_->wake_up_interval != -1)
+    if (settings_.wake_up_interval != -1)
     {
-        setting = settings_->wake_up_interval;
+        setting = settings_.wake_up_interval;
         return LoRaErrorCode::kSucces;
     }
 
@@ -432,7 +431,7 @@ LoRaErrorCode LoRa::GetWakingUpInterval(OUT int &setting)
     if (response_code == LoRaErrorCode::kSucces)
     {
         setting = value.toInt();
-        settings_->wake_up_interval = setting;
+        settings_.wake_up_interval = setting;
     }
 
     return response_code;
@@ -440,7 +439,7 @@ LoRaErrorCode LoRa::GetWakingUpInterval(OUT int &setting)
 
 LoRaErrorCode LoRa::SetAirRateLevel(LoRaSettings::LoRaAirRateLevel setting)
 {
-    if (setting == settings_->lora_air_rate_level)
+    if (setting == settings_.lora_air_rate_level)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -456,7 +455,7 @@ LoRaErrorCode LoRa::SetAirRateLevel(LoRaSettings::LoRaAirRateLevel setting)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->lora_air_rate_level = setting;
+        settings_.lora_air_rate_level = setting;
     }
 
     return response_code;
@@ -464,9 +463,9 @@ LoRaErrorCode LoRa::SetAirRateLevel(LoRaSettings::LoRaAirRateLevel setting)
 
 LoRaErrorCode LoRa::GetAirRateLevel(LoRaSettings::LoRaAirRateLevel &setting)
 {
-    if (settings_->lora_air_rate_level != LoRaSettings::LoRaAirRateLevel::kLoRaAirRateLevelUndefined)
+    if (settings_.lora_air_rate_level != LoRaSettings::LoRaAirRateLevel::kLoRaAirRateLevelUndefined)
     {
-        setting = settings_->lora_air_rate_level;
+        setting = settings_.lora_air_rate_level;
         return LoRaErrorCode::kSucces;
     }
 
@@ -477,15 +476,15 @@ LoRaErrorCode LoRa::GetAirRateLevel(LoRaSettings::LoRaAirRateLevel &setting)
     if (response_code == LoRaErrorCode::kSucces)
     {
         setting = LoRaSettings::LoRaAirRateLevel(value.toInt());
-        settings_->lora_air_rate_level = setting;
+        settings_.lora_air_rate_level = setting;
     }
 
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetDestinationAddress(int address)
+LoRaErrorCode LoRa::SetDestinationAddress(const uint16_t address)
 {
-    if (address == settings_->destination_address)
+    if (address == settings_.destination_address)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -504,8 +503,8 @@ LoRaErrorCode LoRa::SetDestinationAddress(int address)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->destination_address = address;
-        settings_->destination_address_is_set = true;
+        settings_.destination_address = address;
+        settings_.destination_address_is_set = true;
     }
 
     return response_code;
@@ -513,9 +512,9 @@ LoRaErrorCode LoRa::SetDestinationAddress(int address)
 
 LoRaErrorCode LoRa::GetDestinationAddress(OUT int &address)
 {
-    if (settings_->destination_address_is_set)
+    if (settings_.destination_address_is_set)
     {
-        address = settings_->destination_address;
+        address = settings_.destination_address;
         return LoRaErrorCode::kSucces;
     }
 
@@ -526,8 +525,8 @@ LoRaErrorCode LoRa::GetDestinationAddress(OUT int &address)
     if (response_code == LoRaErrorCode::kSucces)
     {
         address = value.toInt();
-        settings_->destination_address = address;
-        settings_->destination_address_is_set = true;
+        settings_.destination_address = address;
+        settings_.destination_address_is_set = true;
     }
 
     return response_code;
@@ -535,7 +534,7 @@ LoRaErrorCode LoRa::GetDestinationAddress(OUT int &address)
 
 LoRaErrorCode LoRa::SetChannel(int channel)
 {
-    if (channel == settings_->channel)
+    if (channel == settings_.channel)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -554,7 +553,7 @@ LoRaErrorCode LoRa::SetChannel(int channel)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->channel = channel;
+        settings_.channel = channel;
     }
 
     return response_code;
@@ -562,9 +561,9 @@ LoRaErrorCode LoRa::SetChannel(int channel)
 
 LoRaErrorCode LoRa::GetChannel(OUT int &channel)
 {
-    if (settings_->channel != -1)
+    if (settings_.channel != -1)
     {
-        channel = settings_->channel;
+        channel = settings_.channel;
         return LoRaErrorCode::kSucces;
     }
 
@@ -575,7 +574,7 @@ LoRaErrorCode LoRa::GetChannel(OUT int &channel)
     if (response_code == LoRaErrorCode::kSucces)
     {
         channel = value.toInt();
-        settings_->channel = channel;
+        settings_.channel = channel;
     }
 
     return response_code;
@@ -583,7 +582,7 @@ LoRaErrorCode LoRa::GetChannel(OUT int &channel)
 
 LoRaErrorCode LoRa::SetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection setting)
 {
-    if (setting == settings_->forward_error_correction)
+    if (setting == settings_.forward_error_correction)
     {
         return LoRaErrorCode::kSucces;
     }
@@ -606,7 +605,7 @@ LoRaErrorCode LoRa::SetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrecti
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->forward_error_correction = setting;
+        settings_.forward_error_correction = setting;
     }
 
     return response_code;
@@ -614,9 +613,9 @@ LoRaErrorCode LoRa::SetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrecti
 
 LoRaErrorCode LoRa::GetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection &setting)
 {
-    if (settings_->forward_error_correction != LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionUndefined)
+    if (settings_.forward_error_correction != LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionUndefined)
     {
-        setting = settings_->forward_error_correction;
+        setting = settings_.forward_error_correction;
         return LoRaErrorCode::kSucces;
     }
 
@@ -628,13 +627,13 @@ LoRaErrorCode LoRa::GetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrecti
     {
         if (value.indexOf("ON") != -1)
         {
-            settings_->forward_error_correction = LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOn;
+            settings_.forward_error_correction = LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOn;
         }
         else if (value.indexOf("OFF") != -1)
         {
-            settings_->forward_error_correction = LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOff;
+            settings_.forward_error_correction = LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionIsOff;
         }
-        setting = settings_->forward_error_correction;
+        setting = settings_.forward_error_correction;
     }
 
     return response_code;
@@ -656,7 +655,7 @@ LoRaErrorCode LoRa::SetPowerTransmissionValue(int setting)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->transmitting_power = setting;
+        settings_.transmitting_power = setting;
     }
 
     return response_code;
@@ -665,9 +664,9 @@ LoRaErrorCode LoRa::SetPowerTransmissionValue(int setting)
 LoRaErrorCode LoRa::GetPowerTransmissionValue(OUT int &setting)
 {
 
-    if (settings_->transmitting_power != 0)
+    if (settings_.transmitting_power != 0)
     {
-        setting = settings_->transmitting_power;
+        setting = settings_.transmitting_power;
         return LoRaErrorCode::kSucces;
     }
 
@@ -678,13 +677,13 @@ LoRaErrorCode LoRa::GetPowerTransmissionValue(OUT int &setting)
     if (response_code == LoRaErrorCode::kSucces)
     {
         setting = value.toInt();
-        settings_->transmitting_power = setting;
+        settings_.transmitting_power = setting;
     }
 
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetTransmissionInterval(int interval = 2000)
+LoRaErrorCode LoRa::SetTransmissionInterval(int interval)
 {
     String command = "+SQT=";
     if ((100 <= interval && interval <= 6000) || false)
@@ -700,7 +699,7 @@ LoRaErrorCode LoRa::SetTransmissionInterval(int interval = 2000)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->test_interval = interval;
+        settings_.test_interval = interval;
     }
 
     return response_code;
@@ -714,7 +713,7 @@ LoRaErrorCode LoRa::QueryTransmissionInterval()
     String received_data = SendCommand(querry);
 
     // If echo is enabled check for the repeated command
-    if (this->settings_->command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)
+    if (this->settings_.command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)
     {
         if (received_data.indexOf(querry) == -1)
         {
@@ -748,7 +747,7 @@ LoRaErrorCode LoRa::SetKey(String key)
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        settings_->key = key;
+        settings_.key = key;
     }
 
     return response_code;
@@ -758,73 +757,120 @@ String LoRa::ReceiveMessage(void)
 {
     // Wait for data to be received
     serial_->WaitForInput();
-    if (serial_->available())
+    char buffer[255] = {0};
+    int cursor = 0;
+    while (serial_->available())
     {
-        return serial_->readString();
+        // TODO: Check if wait is necessary
+        delay(10);
+
+        size_t length = serial_->available();
+
+        // Control for overflow
+        if (cursor + length > 254)
+        {
+            return buffer;
+        }
+
+        for (size_t i = 0; i < length; i++)
+        {
+            buffer[cursor + i] = serial_->read();
+        }
+        cursor += length;
+        buffer[cursor + 1] = '\0';
     }
 
-    return "";
+    return String(buffer);
 };
 
-int LoRa::SendMessage(const char *message)
+int LoRa::SendMessage(const uint8_t *message, size_t length)
 {
-    if (this->settings_->work_mode != LoRaSettings::WorkMode::kWorkModeTransparent)
+    if (this->settings_.work_mode != LoRaSettings::WorkMode::kWorkModeTransparent)
     {
-        return 2;
+        return -2;
     }
 
-    int amountOfBytesWritten = serial_->println(message);
-    if (amountOfBytesWritten)
-    {
-        // Make sure the full message is sent and set mode back to input so other messeages can be received
-        serial_->flush();
-        serial_->SetMode(INPUT);
-        return amountOfBytesWritten;
-    }
+    serial_->SetMode(OUTPUT);
+    int amountOfBytesWritten = serial_->write(message, length);
+    serial_->flush();
+    serial_->SetMode(INPUT);
 
-    return false;
+    return amountOfBytesWritten;
 };
 
-int LoRa::SendMessage(uint16_t destination_address, uint8_t channel, const char *message, uint8_t message_size)
+int LoRa::SendMessage(const char *const message, const size_t length)
 {
-    if (this->settings_->work_mode != LoRaSettings::WorkMode::kWorkModeFixedPoint)
+    if (this->settings_.work_mode != LoRaSettings::WorkMode::kWorkModeTransparent)
     {
-        return 2;
+        return -2;
     }
 
-    const uint8_t destination_address_size = sizeof(uint16_t);
-    const uint8_t channel_size = sizeof(uint8_t);
-    char message_buffer[destination_address_size + channel_size + message_size];
+    serial_->SetMode(OUTPUT);
+    int amountOfBytesWritten = serial_->write(message, length);
+    serial_->flush();
+    serial_->SetMode(INPUT);
+
+    return amountOfBytesWritten;
+};
+
+int LoRa::SendMessage(const char *message, const size_t message_size, const uint16_t destination_address, const uint8_t channel)
+{
+    if (this->settings_.work_mode != LoRaSettings::WorkMode::kWorkModeFixedPoint)
+    {
+        return -2;
+    }
+
+    const size_t destination_address_size = sizeof(destination_address);
+    const size_t channel_size = sizeof(channel);
+
+    const size_t total_message_size = (destination_address_size + channel_size + message_size);
+
+    char message_buffer[total_message_size];
     // Copy destination address into message buffer
-    memcpy(message_buffer, &destination_address, destination_address_size);
+    message_buffer[0] = (destination_address & 0xFF00) >> 8;
+    message_buffer[1] = (destination_address & 0xFF);
+    // TODO: Check id memcpy is also working
+    //  memcpy(message_buffer, &destination_address, destination_address_size);
     // Copy channel into message buffer
     memcpy(message_buffer + destination_address_size, &channel, channel_size);
     // Copy message into message buffer
     memcpy(message_buffer + destination_address_size + channel_size, message, message_size);
 
-    size_t amount_of_bytes_written = serial_->write(message, destination_address_size + channel_size + message_size);
-    if (amount_of_bytes_written == (destination_address_size + channel_size + message_size))
-    {
-        // Make sure the full message is sent and set mode back to input so other messeages can be received
-        serial_->flush();
-        serial_->SetMode(INPUT);
-        return EXIT_SUCCESS;
-    }
+    serial_->SetMode(OUTPUT);
+    int bytes = serial_->write(message_buffer, total_message_size);
 
-    return 1;
+    for (size_t i = 0; i < bytes; i++)
+    {
+        Serial.print(message_buffer[i], HEX);
+        Serial.print(' ');
+    }
+    Serial.println();
+
+    serial_->flush();
+    serial_->SetMode(INPUT);
+    return bytes;
 };
 
 #pragma region private functions
 
 String LoRa::SendCommand(String command)
 {
-    serial_->print(command);
+    serial_->SetMode(OUTPUT);
+    serial_->write(command.c_str(), command.length());
     serial_->flush();
+    serial_->SetMode(INPUT);
 
     serial_->WaitForInput();
     if (serial_->available())
     {
-        return serial_->readString();
+        size_t length = serial_->available();
+        char buffer[length + 1];
+        for (size_t i = 0; i < length; i++)
+        {
+            buffer[i] = serial_->read();
+        }
+        buffer[length] = '\0';
+        return String(buffer);
     }
 
     return "";
@@ -837,7 +883,8 @@ LoRaErrorCode LoRa::SetCommand(String command, String succesfullResponse)
     String received_data = SendCommand(command);
 
     // If echo is enabled check for the repeated command
-    if (this->settings_->command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)
+    // TODO: this->settings_.command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionUndefined
+    if (this->settings_.command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)
     {
         String returned_command = received_data.substring(0, command.length());
         if (returned_command != command)
@@ -855,9 +902,11 @@ LoRaErrorCode LoRa::SetCommand(String command, String succesfullResponse)
         return LoRaErrorCode(error);
     }
 
+    // TODO: Verify if this code is correct
     int index = received_data.indexOf(succesfullResponse);
     if (index == -1)
     {
+        // TODO: Message might be wrong first time around after  enter AT command and exit AT command
         return LoRaErrorCode::kInvalidResponse;
     }
 
@@ -872,7 +921,7 @@ LoRaErrorCode LoRa::GetCommand(String command, OUT String &value, bool using_col
     String received_data = SendCommand(querry);
 
     // If echo is enabled check for the repeated command
-    if (this->settings_->command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)
+    if (this->settings_.command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)
     {
         String returned_command = received_data.substring(0, command.length());
         if (returned_command != querry)

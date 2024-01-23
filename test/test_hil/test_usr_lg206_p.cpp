@@ -15,27 +15,19 @@ RS485 *rs;
  */
 LoRa *lora;
 
-const int buffer_size = 64;
-char buffer[buffer_size];
-
 /**
- * @brief Set the test up by creating a new instance of, the mock stream, the rs485 module and the LoRa module
- *
+ * @brief Set the test up
  */
 void setUp(void)
 {
-    rs = new RS485(enable_pin, enable_pin, &Serial1, false);
-    lora = new LoRa(rs);
 }
 
 /**
- * @brief Clean up the test by deleting the used memory and giving it back
+ * @brief Clean up the test
  *
  */
 void tearDown(void)
 {
-    delete lora;
-    delete rs;
 }
 
 /**
@@ -552,7 +544,7 @@ void test_print(void)
  */
 void test_receive(void)
 {
-    // TODO
+    // TODO test receiving of messages
     String s = lora->ReceiveMessage();
     Serial.println(s);
     TEST_ASSERT_TRUE_MESSAGE(s.length(), "Message could not be received");
@@ -580,14 +572,14 @@ void test_set_and_get(void)
     RUN_TEST(test_channel);
     RUN_TEST(test_forward_error_correction);
     RUN_TEST(test_power_transmission_value);
-    RUN_TEST(test_transmission_interval); // TODO
+    RUN_TEST(test_transmission_interval); // TODO check how transmission interval works
     RUN_TEST(test_key);
 }
 
 void RunAllTests(void)
 {
     RUN_TEST(test_enter_at);
-    RUN_TEST(test_settings); // TODO settings
+    // RUN_TEST(test_settings); // TODO test get and set settings
     test_set_and_get();
     RUN_TEST(test_restart);
     RUN_TEST(test_enter_at);
@@ -607,11 +599,18 @@ void setup()
     // if board doesn't support software reset via Serial.DTR/RTS
     delay(2000);
 
+    Serial1.begin(115200);
+    rs = new RS485(enable_pin, enable_pin, &Serial1, false);
+    lora = new LoRa(rs);
+
     UNITY_BEGIN(); // Start unit testing
 
     RunAllTests();
 
     UNITY_END(); // Stop unit testing
+
+    delete lora;
+    delete rs;
 }
 
 /**

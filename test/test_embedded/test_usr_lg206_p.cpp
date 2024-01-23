@@ -1093,7 +1093,7 @@ void test_print(void)
  */
 void test_receive(void)
 {
-    // TODO
+    // TODO test receiving of messages
     String s = lora->ReceiveMessage();
     Serial.println(s);
     TEST_ASSERT_TRUE_MESSAGE(s.length(), "Message could not be received");
@@ -1121,14 +1121,14 @@ void test_set_and_get(void)
     RUN_TEST(test_channel);
     RUN_TEST(test_forward_error_correction);
     RUN_TEST(test_power_transmission_value);
-    RUN_TEST(test_transmission_interval); // TODO
+    RUN_TEST(test_transmission_interval); // TODO check how transmission interval works
     RUN_TEST(test_key);
 }
 
 void RunAllTests(void)
 {
     RUN_TEST(test_enter_at);
-    RUN_TEST(test_settings); // TODO settings
+    RUN_TEST(test_settings); // TODO test get and set settings
     test_set_and_get();
     RUN_TEST(test_restart);
     RUN_TEST(test_enter_at);

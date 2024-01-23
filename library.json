@@ -21,7 +21,9 @@
     },
     "license": "GNU 3",
     "homepage": "http://rpvos.nl",
-    "dependencies": {},
+    "dependencies": {
+        "external-repo": "https://github.com/rpvos/MAX485TTL.git"
+    },
     "frameworks": [
         "Arduino"
     ],
