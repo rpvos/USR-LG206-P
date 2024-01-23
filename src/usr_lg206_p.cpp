@@ -11,38 +11,38 @@
 #include "usr_lg206_p.h"
 #include <Arduino.h>
 
-LoRa::LoRa(RS485 *serial)
+UsrLg206P::UsrLg206P(RS485 *serial)
 {
     this->serial_ = serial;
     this->settings_ = LoRaSettings::LoRaSettings(false);
 };
 
-LoRa::~LoRa(void)
+UsrLg206P::~UsrLg206P(void)
 {
     this->serial_ = nullptr;
 };
 
-LoRaErrorCode LoRa::FactoryReset(void)
+LoRaErrorCode UsrLg206P::FactoryReset(void)
 {
     LoRaSettings::LoRaSettings factory_settings = LoRaSettings::LoRaSettings(true);
     return SetSettings(factory_settings);
 };
 
-LoRaErrorCode LoRa::SetSettings(LoRaSettings::LoRaSettings settings)
+LoRaErrorCode UsrLg206P::SetSettings(LoRaSettings::LoRaSettings settings)
 {
     this->settings_ = settings;
     // TODO add setter for every setting
     return LoRaErrorCode::kNoResponse;
 }
 
-LoRaErrorCode LoRa::GetSettings(OUT LoRaSettings::LoRaSettings &settings)
+LoRaErrorCode UsrLg206P::GetSettings(OUT LoRaSettings::LoRaSettings &settings)
 {
     // TODO use getter for every setting
 
     return LoRaErrorCode::kNoResponse;
 }
 
-LoRaErrorCode LoRa::BeginAtMode(void)
+LoRaErrorCode UsrLg206P::BeginAtMode(void)
 {
     // Check if the LoRa module is already in AT mode
     if (settings_.at_mode == LoRaSettings::AtMode::kAtModeIsOn)
@@ -81,7 +81,7 @@ LoRaErrorCode LoRa::BeginAtMode(void)
     return LoRaErrorCode::kSucces;
 };
 
-LoRaErrorCode LoRa::EndAtMode(void)
+LoRaErrorCode UsrLg206P::EndAtMode(void)
 {
     // Check if LoRa module was already out of AT mode
     if (settings_.at_mode == LoRaSettings::AtMode::kAtModeIsOff)
@@ -99,7 +99,7 @@ LoRaErrorCode LoRa::EndAtMode(void)
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetEcho(LoRaSettings::CommandEchoFunction setting)
+LoRaErrorCode UsrLg206P::SetEcho(LoRaSettings::CommandEchoFunction setting)
 {
     if (setting == settings_.command_echo_function)
     {
@@ -130,7 +130,7 @@ LoRaErrorCode LoRa::SetEcho(LoRaSettings::CommandEchoFunction setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetEcho(LoRaSettings::CommandEchoFunction &setting)
+LoRaErrorCode UsrLg206P::GetEcho(LoRaSettings::CommandEchoFunction &setting)
 {
     if (settings_.command_echo_function != LoRaSettings::CommandEchoFunction::kCommandEchoFunctionUndefined)
     {
@@ -159,7 +159,7 @@ LoRaErrorCode LoRa::GetEcho(LoRaSettings::CommandEchoFunction &setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::Restart(void)
+LoRaErrorCode UsrLg206P::Restart(void)
 {
     String command = "+Z";
     LoRaErrorCode response = SetCommand(command);
@@ -174,20 +174,20 @@ LoRaErrorCode LoRa::Restart(void)
     return response;
 };
 
-LoRaErrorCode LoRa::SaveAsDefault(void)
+LoRaErrorCode UsrLg206P::SaveAsDefault(void)
 {
     String command = "+CFGTF";
     String succes_message = "+CFGTF:SAVED";
     return SetCommand(command, succes_message);
 };
 
-LoRaErrorCode LoRa::ResetToDefault(void)
+LoRaErrorCode UsrLg206P::ResetToDefault(void)
 {
     String command = "+RELD";
     return SetCommand(command, "REBOOTING");
 };
 
-LoRaErrorCode LoRa::GetNodeId(OUT String &node_id)
+LoRaErrorCode UsrLg206P::GetNodeId(OUT String &node_id)
 {
     if (settings_.node_id != "")
     {
@@ -206,7 +206,7 @@ LoRaErrorCode LoRa::GetNodeId(OUT String &node_id)
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetFirmwareVersion(OUT String &setting)
+LoRaErrorCode UsrLg206P::GetFirmwareVersion(OUT String &setting)
 {
     if (settings_.firmware_version.length())
     {
@@ -225,7 +225,7 @@ LoRaErrorCode LoRa::GetFirmwareVersion(OUT String &setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetWorkMode(LoRaSettings::WorkMode setting)
+LoRaErrorCode UsrLg206P::SetWorkMode(LoRaSettings::WorkMode setting)
 {
     if (setting == settings_.work_mode)
     {
@@ -257,7 +257,7 @@ LoRaErrorCode LoRa::SetWorkMode(LoRaSettings::WorkMode setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetWorkMode(LoRaSettings::WorkMode &setting)
+LoRaErrorCode UsrLg206P::GetWorkMode(LoRaSettings::WorkMode &setting)
 {
     if (settings_.work_mode != LoRaSettings::WorkMode::kWorkModeUndefined)
     {
@@ -286,7 +286,7 @@ LoRaErrorCode LoRa::GetWorkMode(LoRaSettings::WorkMode &setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetUartSettings(LoRaUartSettings::LoRaUartSettings *setting)
+LoRaErrorCode UsrLg206P::SetUartSettings(LoRaUartSettings::LoRaUartSettings *setting)
 {
     String command = "+UART=";
     if (setting != nullptr)
@@ -308,7 +308,7 @@ LoRaErrorCode LoRa::SetUartSettings(LoRaUartSettings::LoRaUartSettings *setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *setting)
+LoRaErrorCode UsrLg206P::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *setting)
 {
     if (settings_.GetUartSettings() != 0)
     {
@@ -329,7 +329,7 @@ LoRaErrorCode LoRa::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *sett
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode setting)
+LoRaErrorCode UsrLg206P::SetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode setting)
 {
     if (setting == settings_.power_consumption_mode)
     {
@@ -360,7 +360,7 @@ LoRaErrorCode LoRa::SetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode s
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode &setting)
+LoRaErrorCode UsrLg206P::GetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode &setting)
 {
     if (settings_.power_consumption_mode != LoRaSettings::PowerConsumptionMode::kPowerConsumptionModeUndefined)
     {
@@ -389,7 +389,7 @@ LoRaErrorCode LoRa::GetPowerConsumptionMode(LoRaSettings::PowerConsumptionMode &
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetWakingUpInterval(int setting)
+LoRaErrorCode UsrLg206P::SetWakingUpInterval(int setting)
 {
     if (setting == settings_.wake_up_interval)
     {
@@ -416,7 +416,7 @@ LoRaErrorCode LoRa::SetWakingUpInterval(int setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetWakingUpInterval(OUT int &setting)
+LoRaErrorCode UsrLg206P::GetWakingUpInterval(OUT int &setting)
 {
     if (settings_.wake_up_interval != -1)
     {
@@ -437,7 +437,7 @@ LoRaErrorCode LoRa::GetWakingUpInterval(OUT int &setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetAirRateLevel(LoRaSettings::LoRaAirRateLevel setting)
+LoRaErrorCode UsrLg206P::SetAirRateLevel(LoRaSettings::LoRaAirRateLevel setting)
 {
     if (setting == settings_.lora_air_rate_level)
     {
@@ -461,7 +461,7 @@ LoRaErrorCode LoRa::SetAirRateLevel(LoRaSettings::LoRaAirRateLevel setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetAirRateLevel(LoRaSettings::LoRaAirRateLevel &setting)
+LoRaErrorCode UsrLg206P::GetAirRateLevel(LoRaSettings::LoRaAirRateLevel &setting)
 {
     if (settings_.lora_air_rate_level != LoRaSettings::LoRaAirRateLevel::kLoRaAirRateLevelUndefined)
     {
@@ -482,7 +482,7 @@ LoRaErrorCode LoRa::GetAirRateLevel(LoRaSettings::LoRaAirRateLevel &setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetDestinationAddress(const uint16_t address)
+LoRaErrorCode UsrLg206P::SetDestinationAddress(const uint16_t address)
 {
     if (address == settings_.destination_address)
     {
@@ -510,7 +510,7 @@ LoRaErrorCode LoRa::SetDestinationAddress(const uint16_t address)
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetDestinationAddress(OUT int &address)
+LoRaErrorCode UsrLg206P::GetDestinationAddress(OUT int &address)
 {
     if (settings_.destination_address_is_set)
     {
@@ -532,7 +532,7 @@ LoRaErrorCode LoRa::GetDestinationAddress(OUT int &address)
     return response_code;
 }
 
-LoRaErrorCode LoRa::SetChannel(int channel)
+LoRaErrorCode UsrLg206P::SetChannel(int channel)
 {
     if (channel == settings_.channel)
     {
@@ -559,7 +559,7 @@ LoRaErrorCode LoRa::SetChannel(int channel)
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetChannel(OUT int &channel)
+LoRaErrorCode UsrLg206P::GetChannel(OUT int &channel)
 {
     if (settings_.channel != -1)
     {
@@ -580,7 +580,7 @@ LoRaErrorCode LoRa::GetChannel(OUT int &channel)
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection setting)
+LoRaErrorCode UsrLg206P::SetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection setting)
 {
     if (setting == settings_.forward_error_correction)
     {
@@ -611,7 +611,7 @@ LoRaErrorCode LoRa::SetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrecti
     return response_code;
 }
 
-LoRaErrorCode LoRa::GetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection &setting)
+LoRaErrorCode UsrLg206P::GetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrection &setting)
 {
     if (settings_.forward_error_correction != LoRaSettings::ForwardErrorCorrection::kForwardErrorCorrectionUndefined)
     {
@@ -639,7 +639,7 @@ LoRaErrorCode LoRa::GetForwardErrorCorrection(LoRaSettings::ForwardErrorCorrecti
     return response_code;
 }
 
-LoRaErrorCode LoRa::SetPowerTransmissionValue(int setting)
+LoRaErrorCode UsrLg206P::SetPowerTransmissionValue(int setting)
 {
     String command = "+PWR=";
     if (10 <= setting && setting <= 20)
@@ -661,7 +661,7 @@ LoRaErrorCode LoRa::SetPowerTransmissionValue(int setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::GetPowerTransmissionValue(OUT int &setting)
+LoRaErrorCode UsrLg206P::GetPowerTransmissionValue(OUT int &setting)
 {
 
     if (settings_.transmitting_power != 0)
@@ -683,7 +683,7 @@ LoRaErrorCode LoRa::GetPowerTransmissionValue(OUT int &setting)
     return response_code;
 };
 
-LoRaErrorCode LoRa::SetTransmissionInterval(int interval)
+LoRaErrorCode UsrLg206P::SetTransmissionInterval(int interval)
 {
     String command = "+SQT=";
     if ((100 <= interval && interval <= 6000) || false)
@@ -705,7 +705,7 @@ LoRaErrorCode LoRa::SetTransmissionInterval(int interval)
     return response_code;
 };
 
-LoRaErrorCode LoRa::QueryTransmissionInterval()
+LoRaErrorCode UsrLg206P::QueryTransmissionInterval()
 {
     String returnValue = "";
     String querry = "AT+SQT\r\n";
@@ -731,7 +731,7 @@ LoRaErrorCode LoRa::QueryTransmissionInterval()
     return LoRaErrorCode::kSucces;
 };
 
-LoRaErrorCode LoRa::SetKey(String key)
+LoRaErrorCode UsrLg206P::SetKey(String key)
 {
     String command = "+KEY=";
     if (key.length() == 16)
@@ -753,7 +753,7 @@ LoRaErrorCode LoRa::SetKey(String key)
     return response_code;
 };
 
-String LoRa::ReceiveMessage(void)
+String UsrLg206P::ReceiveMessage(void)
 {
     // Wait for data to be received
     serial_->WaitForInput();
@@ -783,7 +783,7 @@ String LoRa::ReceiveMessage(void)
     return String(buffer);
 };
 
-int LoRa::SendMessage(const uint8_t *message, size_t length)
+int UsrLg206P::SendMessage(const uint8_t *message, size_t length)
 {
     if (this->settings_.work_mode != LoRaSettings::WorkMode::kWorkModeTransparent)
     {
@@ -798,7 +798,7 @@ int LoRa::SendMessage(const uint8_t *message, size_t length)
     return amountOfBytesWritten;
 };
 
-int LoRa::SendMessage(const char *const message, const size_t length)
+int UsrLg206P::SendMessage(const char *const message, const size_t length)
 {
     if (this->settings_.work_mode != LoRaSettings::WorkMode::kWorkModeTransparent)
     {
@@ -813,7 +813,7 @@ int LoRa::SendMessage(const char *const message, const size_t length)
     return amountOfBytesWritten;
 };
 
-int LoRa::SendMessage(const char *message, const size_t message_size, const uint16_t destination_address, const uint8_t channel)
+int UsrLg206P::SendMessage(const char *message, const size_t message_size, const uint16_t destination_address, const uint8_t channel)
 {
     if (this->settings_.work_mode != LoRaSettings::WorkMode::kWorkModeFixedPoint)
     {
@@ -853,7 +853,7 @@ int LoRa::SendMessage(const char *message, const size_t message_size, const uint
 
 #pragma region private functions
 
-String LoRa::SendCommand(String command)
+String UsrLg206P::SendCommand(String command)
 {
     serial_->SetMode(OUTPUT);
     serial_->write(command.c_str(), command.length());
@@ -876,7 +876,7 @@ String LoRa::SendCommand(String command)
     return "";
 }
 
-LoRaErrorCode LoRa::SetCommand(String command, String succesfullResponse)
+LoRaErrorCode UsrLg206P::SetCommand(String command, String succesfullResponse)
 {
     command = "AT" + command + "\r\n";
     String expected_data = command;
@@ -913,7 +913,7 @@ LoRaErrorCode LoRa::SetCommand(String command, String succesfullResponse)
     return LoRaErrorCode::kSucces;
 };
 
-LoRaErrorCode LoRa::GetCommand(String command, OUT String &value, bool using_colon, String succesfullResponse)
+LoRaErrorCode UsrLg206P::GetCommand(String command, OUT String &value, bool using_colon, String succesfullResponse)
 {
     String returnValue = "";
     String querry = "AT" + command + "\r\n";

@@ -11,7 +11,7 @@ const uint16_t kBaseAddress = 2;
 const uint8_t kEnablePin = 2;
 
 RS485 rs = RS485(kEnablePin, kEnablePin, &Serial1);
-LoRa lora = LoRa(&rs);
+UsrLg206P lora = UsrLg206P(&rs);
 int state = 0;
 
 void SetupRandomCode()

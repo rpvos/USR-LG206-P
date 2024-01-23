@@ -29,7 +29,7 @@
  * @brief Class used to connect and communicate to a LoRa module type USR_LG_206_P
  *
  */
-class LoRa
+class UsrLg206P
 {
 public:
     /**
@@ -37,13 +37,13 @@ public:
      *
      * @param serial the stream to which data needs to be sent to communicate with the module
      */
-    LoRa(RS485 *serial);
+    UsrLg206P(RS485 *serial);
 
     /**
      * @brief Destroy the LoRa object
      *
      */
-    ~LoRa(void);
+    ~UsrLg206P(void);
 
     /**
      * @brief Set the settings of the LoRa module to factory settings
