@@ -29,5 +29,11 @@
     ],
     "platforms": [
         "atmelavr"
+    ],
+    "headers": [
+        "usr_lg206_p_error_code.h",
+        "usr_lg206_p_settings.h",
+        "usr_lg206_p_uart_settings.h",
+        "usr_lg206_p.h"
     ]
 }
