@@ -246,7 +246,7 @@ void loop()
         String s = lora.ReceiveMessage();
         if (s.length())
         {
-            lora.SendMessage(kBaseAddress, kBaseChannel, s.c_str(), s.length());
+            lora.SendMessage(s.c_str(), s.length(), kBaseAddress, kBaseChannel);
             Serial.println(s);
         }
 
