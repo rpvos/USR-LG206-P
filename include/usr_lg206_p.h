@@ -280,6 +280,13 @@ public:
     LoRaErrorCode SetKey(String key = "FFFFFFFFFFFFFFFF");
 
     /**
+     * @brief Function used to check if messages are received
+     *
+     * @return int amount of bytes available
+     */
+    int Available(void);
+
+    /**
      * @brief Function used to retrieve a message from the module
      *
      * @return the data received

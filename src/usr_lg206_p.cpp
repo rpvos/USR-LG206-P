@@ -751,6 +751,10 @@ LoRaErrorCode UsrLg206P::SetKey(String key)
     }
 
     return response_code;
+}
+int UsrLg206P::Available(void)
+{
+    return serial_->available();
 };
 
 String UsrLg206P::ReceiveMessage(void)
