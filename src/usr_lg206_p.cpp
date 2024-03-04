@@ -11,6 +11,18 @@
 #include "usr_lg206_p.h"
 #include <Arduino.h>
 
+#ifndef kDelayTimeAfterSwitch
+#define kDelayTimeAfterSwitch 10
+#endif
+
+#ifndef kDelayTimeAfterAvailable
+#define kDelayTimeAfterAvailable 10
+#endif
+
+#ifndef kDelayTimeBetweenChars
+#define kDelayTimeBetweenChars 3
+#endif
+
 UsrLg206P::UsrLg206P(RS485 *serial)
 {
     this->serial_ = serial;
@@ -766,7 +778,7 @@ String UsrLg206P::ReceiveMessage(void)
     while (serial_->available())
     {
         // TODO: Check if wait is necessary
-        delay(10);
+        delay(kDelayTimeBetweenChars);
 
         size_t length = serial_->available();
 
@@ -841,14 +853,8 @@ int UsrLg206P::SendMessage(const char *message, const size_t message_size, const
     memcpy(message_buffer + destination_address_size + channel_size, message, message_size);
 
     serial_->SetMode(OUTPUT);
+    delay(kDelayTimeAfterSwitch);
     int bytes = serial_->write(message_buffer, total_message_size);
-
-    for (size_t i = 0; i < bytes; i++)
-    {
-        Serial.print(message_buffer[i], HEX);
-        Serial.print(' ');
-    }
-    Serial.println();
 
     serial_->flush();
     serial_->SetMode(INPUT);
@@ -860,6 +866,7 @@ int UsrLg206P::SendMessage(const char *message, const size_t message_size, const
 String UsrLg206P::SendCommand(String command)
 {
     serial_->SetMode(OUTPUT);
+    delay(kDelayTimeAfterSwitch);
     serial_->write(command.c_str(), command.length());
     serial_->flush();
     serial_->SetMode(INPUT);
@@ -867,6 +874,7 @@ String UsrLg206P::SendCommand(String command)
     serial_->WaitForInput();
     if (serial_->available())
     {
+        delay(kDelayTimeAfterAvailable);
         size_t length = serial_->available();
         char buffer[length + 1];
         for (size_t i = 0; i < length; i++)

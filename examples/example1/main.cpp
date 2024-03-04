@@ -2,7 +2,8 @@
 #include <MAX485TTL.hpp>
 #include <usr_lg206_p.h>
 
-const bool kIsSensorNode = false;
+const bool kIsSensorNode = true;
+
 const uint8_t kSensorChannel = 36;
 const uint8_t kBaseChannel = 37;
 const uint16_t kSensorAddress = 3;
@@ -21,16 +22,17 @@ void SetupRandomCode()
 
 String GetRandomCode()
 {
-    // String code = String(random(10000, 99999));
-    const int buffer_size = 15;
-    char buffer[buffer_size] = "ABCDEFGHIJKLMN";
+    String code = String(random(10000, 99999));
+    // const int buffer_size = 16;
+    // char buffer[buffer_size + 1];
 
     // for (size_t i = 0; i < buffer_size; i++)
     // {
     //     buffer[i] = 'A' + random(0, 26);
     // }
+    // buffer[buffer_size] = '\0';
 
-    String code = String(buffer);
+    // String code = String(buffer);
     // String code = String(random(10000, 99999));
     return code;
 }
@@ -43,6 +45,8 @@ void setup()
 
     SetupRandomCode();
 }
+
+long amount_correct = 0;
 
 void loop()
 {
@@ -201,7 +205,6 @@ void loop()
     }
     case 7:
     {
-        // String message = "AAAA";
         String message = GetRandomCode();
         int time_send = millis();
         int bytes = lora.SendMessage(message.c_str(), message.length(), kSensorAddress, kSensorChannel);
@@ -234,11 +237,10 @@ void loop()
             }
             else
             {
-                Serial.println("Correct message received");
+                Serial.println(++amount_correct);
             }
         }
 
-        delay(1000);
         break;
     }
     case 8:
