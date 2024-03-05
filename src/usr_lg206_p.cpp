@@ -15,12 +15,8 @@
 #define kDelayTimeAfterSwitch 10
 #endif
 
-#ifndef kDelayTimeAfterAvailable
-#define kDelayTimeAfterAvailable 10
-#endif
-
 #ifndef kDelayTimeBetweenChars
-#define kDelayTimeBetweenChars 3
+#define kDelayTimeBetweenChars 20
 #endif
 
 UsrLg206P::UsrLg206P(RS485 *serial)
@@ -871,21 +867,7 @@ String UsrLg206P::SendCommand(String command)
     serial_->flush();
     serial_->SetMode(INPUT);
 
-    serial_->WaitForInput();
-    if (serial_->available())
-    {
-        delay(kDelayTimeAfterAvailable);
-        size_t length = serial_->available();
-        char buffer[length + 1];
-        for (size_t i = 0; i < length; i++)
-        {
-            buffer[i] = serial_->read();
-        }
-        buffer[length] = '\0';
-        return String(buffer);
-    }
-
-    return "";
+    return ReceiveMessage();
 }
 
 LoRaErrorCode UsrLg206P::SetCommand(String command, String succesfullResponse)
