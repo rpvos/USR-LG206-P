@@ -797,17 +797,7 @@ String UsrLg206P::ReceiveMessage(void)
 
 int UsrLg206P::SendMessage(const uint8_t *message, size_t length)
 {
-    if (this->settings_.work_mode != LoRaSettings::WorkMode::kWorkModeTransparent)
-    {
-        return -2;
-    }
-
-    serial_->SetMode(OUTPUT);
-    int amountOfBytesWritten = serial_->write(message, length);
-    serial_->flush();
-    serial_->SetMode(INPUT);
-
-    return amountOfBytesWritten;
+    return SendMessage(reinterpret_cast<const char *>(message), length);
 };
 
 int UsrLg206P::SendMessage(const char *const message, const size_t length)
