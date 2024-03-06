@@ -58,9 +58,13 @@ LoRaErrorCode UsrLg206P::BeginAtMode(void)
         return LoRaErrorCode::kSucces;
     }
 
-    String received_data = "";
     String sent_data = "+++";
-    received_data = SendCommand(sent_data);
+    size_t bytes_written = SendCommand(sent_data);
+
+    const size_t buffer_size = 128;
+    uint8_t buffer[buffer_size];
+    size_t size = ReceiveMessage(buffer, buffer_size);
+    String received_data = String((char *)buffer);
     if (received_data.length() < 1)
     {
         return LoRaErrorCode::kNoResponse;
@@ -73,7 +77,10 @@ LoRaErrorCode UsrLg206P::BeginAtMode(void)
     }
 
     sent_data = "a";
-    received_data = SendCommand(sent_data);
+    bytes_written = SendCommand(sent_data);
+
+    size = ReceiveMessage(buffer, buffer_size);
+    received_data = String((char *)buffer);
     if (received_data.length() < 1)
     {
         return LoRaErrorCode::kNoResponse;
@@ -718,7 +725,12 @@ LoRaErrorCode UsrLg206P::QueryTransmissionInterval()
     String returnValue = "";
     String querry = "AT+SQT\r\n";
     String expected_data = querry;
-    String received_data = SendCommand(querry);
+    size_t bytes_written = SendCommand(querry);
+
+    const size_t buffer_size = 128;
+    uint8_t buffer[buffer_size];
+    size_t size = ReceiveMessage(buffer, buffer_size);
+    String received_data = String((char *)buffer);
 
     // If echo is enabled check for the repeated command
     if (this->settings_.command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)
@@ -765,23 +777,22 @@ int UsrLg206P::Available(void)
     return serial_->available();
 };
 
-String UsrLg206P::ReceiveMessage(void)
+size_t UsrLg206P::ReceiveMessage(uint8_t *buffer, size_t buffer_size)
 {
     // Wait for data to be received
     serial_->WaitForInput();
-    char buffer[255] = {0};
     int cursor = 0;
     while (serial_->available())
     {
         // TODO: Check if wait is necessary
-        delay(kDelayTimeBetweenChars);
+        delay(10);
 
         size_t length = serial_->available();
 
         // Control for overflow
-        if (cursor + length > 254)
+        if (cursor + length > buffer_size - 1)
         {
-            return buffer;
+            return cursor;
         }
 
         for (size_t i = 0; i < length; i++)
@@ -791,8 +802,9 @@ String UsrLg206P::ReceiveMessage(void)
         cursor += length;
         buffer[cursor + 1] = '\0';
     }
+    Serial.println();
 
-    return String(buffer);
+    return cursor;
 };
 
 int UsrLg206P::SendMessage(const uint8_t *message, size_t length)
@@ -802,10 +814,10 @@ int UsrLg206P::SendMessage(const uint8_t *message, size_t length)
 
 int UsrLg206P::SendMessage(const char *const message, const size_t length)
 {
-    if (this->settings_.work_mode != LoRaSettings::WorkMode::kWorkModeTransparent)
-    {
-        return -2;
-    }
+    // if (this->settings_.work_mode != LoRaSettings::WorkMode::kWorkModeTransparent)
+    // {
+    //     return -2;
+    // }
 
     serial_->SetMode(OUTPUT);
     int amountOfBytesWritten = serial_->write(message, length);
@@ -849,22 +861,26 @@ int UsrLg206P::SendMessage(const char *message, const size_t message_size, const
 
 #pragma region private functions
 
-String UsrLg206P::SendCommand(String command)
+size_t UsrLg206P::SendCommand(String command)
 {
     serial_->SetMode(OUTPUT);
     delay(kDelayTimeAfterSwitch);
-    serial_->write(command.c_str(), command.length());
+    size_t bytes_written = serial_->write(command.c_str(), command.length());
     serial_->flush();
     serial_->SetMode(INPUT);
-
-    return ReceiveMessage();
+    return bytes_written;
 }
 
 LoRaErrorCode UsrLg206P::SetCommand(String command, String succesfullResponse)
 {
     command = "AT" + command + "\r\n";
     String expected_data = command;
-    String received_data = SendCommand(command);
+    size_t bytes_written = SendCommand(command);
+
+    const size_t buffer_size = 128;
+    uint8_t buffer[buffer_size];
+    size_t size = ReceiveMessage(buffer, buffer_size);
+    String received_data = String((char *)buffer);
 
     // If echo is enabled check for the repeated command
     // TODO: this->settings_.command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionUndefined
@@ -902,7 +918,12 @@ LoRaErrorCode UsrLg206P::GetCommand(String command, OUT String &value, bool usin
     String returnValue = "";
     String querry = "AT" + command + "\r\n";
     String expected_data = querry;
-    String received_data = SendCommand(querry);
+    size_t bytes_written = SendCommand(querry);
+
+    const size_t buffer_size = 128;
+    uint8_t buffer[buffer_size];
+    size_t size = ReceiveMessage(buffer, buffer_size);
+    String received_data = String((char *)buffer);
 
     // If echo is enabled check for the repeated command
     if (this->settings_.command_echo_function == LoRaSettings::CommandEchoFunction::kCommandEchoFunctionIsOn)

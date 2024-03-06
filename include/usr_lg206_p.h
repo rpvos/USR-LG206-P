@@ -291,7 +291,7 @@ public:
      *
      * @return the data received
      */
-    String ReceiveMessage(void);
+    size_t ReceiveMessage(uint8_t *buffer, size_t buffer_size);
 
     /**
      * @brief Function used to send data
@@ -351,7 +351,7 @@ private:
      * @param command which needs to be send
      * @return String response
      */
-    String SendCommand(String command);
+    size_t SendCommand(String command);
 };
 
 #endif // USR_LG206_P_H_
