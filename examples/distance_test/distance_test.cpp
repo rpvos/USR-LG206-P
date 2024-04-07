@@ -1,8 +1,10 @@
 #include <Arduino.h>
-#include <MAX485TTL.hpp>
+#include <max485ttl.hpp>
 #include <usr_lg206_p.h>
 
-const bool kIsSensorNode = true;
+// #define DEBUG_PRINT
+
+const bool kIsSensorNode = false;
 
 const uint8_t kSensorChannel = 40;
 const uint8_t kBaseChannel = 37;
@@ -10,10 +12,14 @@ const uint16_t kSensorAddress = 1;
 const uint16_t kBaseAddress = 2;
 
 const uint8_t kEnablePin = 2;
+const size_t kMessageFrequency = 10000;
 
 RS485 rs = RS485(kEnablePin, kEnablePin, &Serial1);
 UsrLg206P lora = UsrLg206P(&rs);
 int state = 0;
+
+const size_t buffer_size = 64;
+uint8_t buffer[buffer_size];
 
 void SetupRandomCode()
 {
@@ -22,25 +28,22 @@ void SetupRandomCode()
 
 String GetRandomCode()
 {
-    String code = String(random(10000, 99999));
-    // const int buffer_size = 16;
-    // char buffer[buffer_size + 1];
-
-    // for (size_t i = 0; i < buffer_size; i++)
-    // {
-    //     buffer[i] = 'A' + random(0, 26);
-    // }
-    // buffer[buffer_size] = '\0';
-
-    // String code = String(buffer);
-    // String code = String(random(10000, 99999));
-    return code;
+    return String(random(10000, 99999));
 }
 
 void setup()
 {
+// Sensor node doesn't communicate with Serial
+#ifdef DEBUG_PRINT
     Serial.begin(9600);
-    // Serial using 8 bits, No parity and 1 stop bit
+#endif
+
+    if (!kIsSensorNode)
+    {
+        Serial.begin(9600);
+    }
+
+    // Serial using 8 bits, No parity and 1 stop bit for LoRa module
     Serial1.begin(115200, SERIAL_8N1);
 
     SetupRandomCode();
@@ -58,7 +61,9 @@ void loop()
         response_code = lora.BeginAtMode();
         if (response_code == LoRaErrorCode::kSucces)
         { // Create distance between state completes
+#ifdef DEBUG_PRINT
             Serial.println("At mode entered");
+#endif
             state++;
         }
         else
@@ -69,10 +74,12 @@ void loop()
     }
     case 1:
     {
-        response_code = lora.SetWorkMode(LoRaSettings::WorkMode::kWorkModeTransparent);
+        response_code = lora.SetWorkMode(LoRaSettings::WorkMode::kWorkModeFixedPoint);
         if (response_code == LoRaErrorCode::kSucces)
         {
+#ifdef DEBUG_PRINT
             Serial.println("Workmode set");
+#endif
             state++;
         }
         else
@@ -86,7 +93,10 @@ void loop()
         response_code = lora.SetAirRateLevel(LoRaSettings::LoRaAirRateLevel::kLoRaAirRateLevel268);
         if (response_code == LoRaErrorCode::kSucces)
         {
+#ifdef DEBUG_PRINT
             Serial.println("Air rate level set");
+#endif
+
             state++;
         }
         else
@@ -108,7 +118,10 @@ void loop()
 
         if (response_code == LoRaErrorCode::kSucces)
         {
+#ifdef DEBUG_PRINT
             Serial.println("Channel set");
+#endif
+
             state++;
         }
         else
@@ -130,7 +143,9 @@ void loop()
 
         if (response_code == LoRaErrorCode::kSucces)
         {
+#ifdef DEBUG_PRINT
             Serial.println("Destination address set");
+#endif
             state++;
         }
         else
@@ -144,7 +159,9 @@ void loop()
         response_code = lora.SetPowerTransmissionValue(10);
         if (response_code == LoRaErrorCode::kSucces)
         {
+#ifdef DEBUG_PRINT
             Serial.println("Power transmission value set");
+#endif
             state++;
         }
         else
@@ -153,41 +170,15 @@ void loop()
         }
         break;
     }
-        // Here
-        // case 5:
-        // {
-        //     response_code = lora.SetTransmissionInterval();
-        //     if (response_code == LoRaErrorCode::kSucces)
-        //     {
-        //         state += 2;
-        //     }
-        //     break;
-        // }
-        // case 6:
-        // {
-        //     response_code = lora.EndAtMode();
-        //     // If register is succefully retrieved
-        //     if (response_code == LoRaErrorCode::kSucces)
-        //     {
-        //         Serial.println("At mode exited");
-        //         state += 1;
-        //     }
-        //     break;
-        // }
-        // case 7:
-        // {
-        //     Serial.println(lora.ReceiveMessage());
-        //     break;
-        // }
-        // Here
-
     case 6:
     {
         response_code = lora.EndAtMode();
         // If register is succefully retrieved
         if (response_code == LoRaErrorCode::kSucces)
         {
+#ifdef DEBUG_PRINT
             Serial.println("At mode exited");
+#endif
             if (kIsSensorNode)
             {
                 state += 2;
@@ -205,68 +196,115 @@ void loop()
     }
     case 7:
     {
+        // Base station code
         String message = GetRandomCode();
         int time_send = millis();
         int bytes = lora.SendMessage(message.c_str(), message.length(), kSensorAddress, kSensorChannel);
-
-        String received_data;
-        while (true)
+        if (!bytes)
         {
-            received_data = lora.ReceiveMessage();
-            if (received_data.length())
+#ifdef DEBUG_PRINT
+            Serial.println("Message not sent correctly");
+#endif
+            return;
+        }
+
+        size_t length = lora.ReceiveMessage(buffer, buffer_size);
+        if (length)
+        {
+            if (length < buffer_size - 1)
             {
-                break;
+                buffer[length] = '\0';
+            }
+            else
+            {
+                buffer[buffer_size - 1] = '\0';
             }
         }
 
         int time_received = millis();
-        Serial.print("Time in millis: ");
-        Serial.println(time_received - time_send);
 
         // Only if something is received write it in the loggs
-        if (received_data.length())
+        if (length)
         {
+#ifdef DEBUG_PRINT
+            Serial.print("Time in millis: ");
+            Serial.println(time_received - time_send);
             Serial.print("S:");
             Serial.println(message);
             Serial.print("R:");
-            Serial.println(received_data);
-
-            if (!message.equals(received_data))
+            Serial.println(reinterpret_cast<char *>(buffer));
+#endif
+            if (!message.equals(reinterpret_cast<char *>(buffer)))
             {
                 Serial.println("Incorrect message received");
             }
             else
             {
+                Serial.print("Correct messages: ");
                 Serial.println(++amount_correct);
             }
         }
+        else
+        {
+#ifdef DEBUG_PRINT
+            Serial.println("Nothing received");
+#endif
+        }
 
+        size_t time_remaining = 0;
+        if ((time_received - time_send) < kMessageFrequency)
+        {
+            time_remaining = kMessageFrequency - (time_received - time_send);
+        }
+
+        delay(time_remaining);
         break;
     }
     case 8:
     {
-        String s = lora.ReceiveMessage();
-        if (s.length())
+        // Sender node
+        size_t length = lora.ReceiveMessage(buffer, buffer_size);
+        if (length)
         {
-            lora.SendMessage(s.c_str(), s.length());
-            Serial.println(s);
+            if (length < buffer_size - 1)
+            {
+                buffer[length] = '\0';
+#ifdef DEBUG_PRINT
+                Serial.print("Length: ");
+                Serial.print((int)length);
+                Serial.print(':');
+                Serial.println(reinterpret_cast<char *>(buffer));
+#endif
+                int bytes = lora.SendMessage(reinterpret_cast<char *>(buffer), length, kBaseAddress, kBaseChannel);
+                if (bytes != length + 3)
+                {
+#ifdef DEBUG_PRINT
+                    Serial.println("Message not sent correctly");
+#endif
+                }
+            }
         }
 
         break;
     }
     default:
     {
+#ifdef DEBUG_PRINT
         Serial.println("Unknown state");
+#endif
         delay(1000);
         break;
     }
     } // switch state
+
     // Print error
     if (response_code != LoRaErrorCode::kSucces)
     {
+#ifdef DEBUG_PRINT
         Serial.print("State: ");
         Serial.println(state);
         Serial.print("Response code: ");
         Serial.println(static_cast<int>(response_code));
+#endif
     }
 }

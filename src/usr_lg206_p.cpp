@@ -9,7 +9,7 @@
  *
  */
 #include "usr_lg206_p.h"
-#include <Arduino.h>
+// #include <Arduino.h>
 
 #ifndef kDelayTimeAfterSwitch
 #define kDelayTimeAfterSwitch 10
@@ -19,7 +19,7 @@
 #define kDelayTimeBetweenChars 20
 #endif
 
-UsrLg206P::UsrLg206P(RS485 *serial)
+UsrLg206P::UsrLg206P(RS485 *const serial)
 {
     this->serial_ = serial;
     this->settings_ = LoRaSettings::LoRaSettings(false);
@@ -36,7 +36,7 @@ LoRaErrorCode UsrLg206P::FactoryReset(void)
     return SetSettings(factory_settings);
 };
 
-LoRaErrorCode UsrLg206P::SetSettings(LoRaSettings::LoRaSettings settings)
+LoRaErrorCode UsrLg206P::SetSettings(const LoRaSettings::LoRaSettings &settings)
 {
     this->settings_ = settings;
     // TODO add setter for every setting
@@ -114,7 +114,7 @@ LoRaErrorCode UsrLg206P::EndAtMode(void)
     return response_code;
 };
 
-LoRaErrorCode UsrLg206P::SetEcho(LoRaSettings::CommandEchoFunction setting)
+LoRaErrorCode UsrLg206P::SetEcho(const LoRaSettings::CommandEchoFunction &setting)
 {
     if (setting == settings_.command_echo_function)
     {
@@ -240,7 +240,7 @@ LoRaErrorCode UsrLg206P::GetFirmwareVersion(OUT String &setting)
     return response_code;
 };
 
-LoRaErrorCode UsrLg206P::SetWorkMode(LoRaSettings::WorkMode setting)
+LoRaErrorCode UsrLg206P::SetWorkMode(const LoRaSettings::WorkMode &setting)
 {
     if (setting == settings_.work_mode)
     {
@@ -301,17 +301,10 @@ LoRaErrorCode UsrLg206P::GetWorkMode(LoRaSettings::WorkMode &setting)
     return response_code;
 };
 
-LoRaErrorCode UsrLg206P::SetUartSettings(LoRaUartSettings::LoRaUartSettings *setting)
+LoRaErrorCode UsrLg206P::SetUartSettings(const LoRaUartSettings::LoRaUartSettings &setting)
 {
     String command = "+UART=";
-    if (setting != nullptr)
-    {
-        command += setting->toString();
-    }
-    else
-    {
-        return LoRaErrorCode::kInvalidParameter;
-    }
+    command += setting.toString();
 
     LoRaErrorCode response_code = SetCommand(command);
 
@@ -323,9 +316,9 @@ LoRaErrorCode UsrLg206P::SetUartSettings(LoRaUartSettings::LoRaUartSettings *set
     return response_code;
 };
 
-LoRaErrorCode UsrLg206P::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *setting)
+LoRaErrorCode UsrLg206P::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings &setting)
 {
-    if (settings_.GetUartSettings() != 0)
+    if (settings_.GetUartSettings() != LoRaUartSettings::LoRaUartSettings(false))
     {
         setting = settings_.GetUartSettings();
         return LoRaErrorCode::kSucces;
@@ -337,7 +330,7 @@ LoRaErrorCode UsrLg206P::GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings 
 
     if (response_code == LoRaErrorCode::kSucces)
     {
-        setting->fromString(value);
+        setting.fromString(value);
         settings_.SetUartSettings(setting);
     }
 
@@ -802,12 +795,11 @@ size_t UsrLg206P::ReceiveMessage(uint8_t *buffer, size_t buffer_size)
         cursor += length;
         buffer[cursor + 1] = '\0';
     }
-    Serial.println();
 
     return cursor;
 };
 
-int UsrLg206P::SendMessage(const uint8_t *message, size_t length)
+int UsrLg206P::SendMessage(const uint8_t *message, const size_t length)
 {
     return SendMessage(reinterpret_cast<const char *>(message), length);
 };

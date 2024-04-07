@@ -74,14 +74,14 @@ namespace LoRaSettings
         String key; // 16 bytes HEX format character string
 
         explicit LoRaSettings(bool usingFactorySettings = false);
-        LoRaUartSettings::LoRaUartSettings *GetUartSettings(void);
-        void SetUartSettings(LoRaUartSettings::LoRaUartSettings *newUARTSettings);
+        LoRaUartSettings::LoRaUartSettings GetUartSettings(void);
+        void SetUartSettings(const LoRaUartSettings::LoRaUartSettings &newUARTSettings);
 
         bool operator==(const LoRaSettings &b) const;
         bool operator!=(const LoRaSettings &b) const;
 
     private:
-        LoRaUartSettings::LoRaUartSettings *uart_;
+        LoRaUartSettings::LoRaUartSettings uart_;
     };
 } // namespace LoRaSettings
 

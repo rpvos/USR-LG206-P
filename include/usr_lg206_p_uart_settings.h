@@ -6,7 +6,7 @@ namespace LoRaUartSettings
 {
     enum class Baudrate : long
     {
-        baudrate_undefined = -1,
+        baudrate_undefined = 0,
         baudrate_1200 = 1200,
         baudrate_2400 = 2400,
         baudrate_4800 = 4800,
@@ -18,14 +18,14 @@ namespace LoRaUartSettings
     };
     enum class Parity
     {
-        parity_undefined = -1,
+        parity_undefined = 0,
         parity_none = 1,
         parity_even = 2,
         parity_odd = 3,
     };
     enum class Flowcontrol
     {
-        flowcontrol_undefined = -1,
+        flowcontrol_undefined = 0,
         flowcontrol_485 = 1,
         flowcontrol_nfc = 2,
     };
@@ -43,7 +43,7 @@ namespace LoRaUartSettings
         Flowcontrol flowControl;
 
         explicit LoRaUartSettings(bool usingFactorySettings = false);
-        String toString(void);
+        String toString(void) const;
         int fromString(String);
 
         bool operator==(const LoRaUartSettings &b) const;

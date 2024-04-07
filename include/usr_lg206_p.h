@@ -37,7 +37,7 @@ public:
      *
      * @param serial the stream to which data needs to be sent to communicate with the module
      */
-    UsrLg206P(RS485 *serial);
+    UsrLg206P(RS485 *const serial);
 
     /**
      * @brief Destroy the LoRa object
@@ -53,7 +53,7 @@ public:
     LoRaErrorCode FactoryReset(void);
 
     // TODO set settings
-    LoRaErrorCode SetSettings(LoRaSettings::LoRaSettings settings);
+    LoRaErrorCode SetSettings(const LoRaSettings::LoRaSettings &settings);
 
     // TODO get settings
     LoRaErrorCode GetSettings(OUT LoRaSettings::LoRaSettings &settings);
@@ -78,7 +78,7 @@ public:
      * @param isOn the value to which it is set
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode SetEcho(LoRaSettings::CommandEchoFunction command_echo_function);
+    LoRaErrorCode SetEcho(const LoRaSettings::CommandEchoFunction &command_echo_function);
 
     /**
      * @brief Function used to get the currect value of the echo function command on the LoRa module
@@ -131,7 +131,7 @@ public:
      * @param wmode WorkMode (kWorkModeTransparent or kWorkModeFixedPoint)
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode SetWorkMode(LoRaSettings::WorkMode work_mode = LoRaSettings::WorkMode::kWorkModeTransparent);
+    LoRaErrorCode SetWorkMode(const LoRaSettings::WorkMode &work_mode = LoRaSettings::WorkMode::kWorkModeTransparent);
 
     /**
      * @brief Function used to get the work mode
@@ -147,7 +147,7 @@ public:
      * @param settings variable containing the requested settings
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode SetUartSettings(LoRaUartSettings::LoRaUartSettings *setting);
+    LoRaErrorCode SetUartSettings(const LoRaUartSettings::LoRaUartSettings &setting);
 
     /**
      * @brief Get the uart settings of the LoRa module
@@ -155,7 +155,7 @@ public:
      * @param settings OUTPUT variable used to store the requested value
      * @return true if succesfull, false if unsuccesfull
      */
-    LoRaErrorCode GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings *setting);
+    LoRaErrorCode GetUartSettings(OUT LoRaUartSettings::LoRaUartSettings &setting);
 
     /**
      * @brief Set the power consumption mode
@@ -299,7 +299,7 @@ public:
      * @param message data that needs to be send
      * @return amount of bytes written
      */
-    int SendMessage(const uint8_t *message, size_t length);
+    int SendMessage(const uint8_t *message, const size_t length);
 
     int SendMessage(const char *const message, const size_t length);
 

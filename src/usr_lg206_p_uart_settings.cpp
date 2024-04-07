@@ -12,11 +12,11 @@ LoRaUartSettings::LoRaUartSettings::LoRaUartSettings(bool usingFactorySettings)
     }
     else
     {
-        this->buadrate = Baudrate::baudrate_115200;
-        this->dataBits = 8;
-        this->stopBits = 1;
-        this->parity = Parity::parity_none;
-        this->flowControl = Flowcontrol::flowcontrol_485;
+        this->buadrate = Baudrate::baudrate_undefined;
+        this->dataBits = 0;
+        this->stopBits = 0;
+        this->parity = Parity::parity_undefined;
+        this->flowControl = Flowcontrol::flowcontrol_undefined;
     };
 };
 
@@ -51,7 +51,7 @@ bool LoRaUartSettings::LoRaUartSettings::operator==(const LoRaUartSettings &b) c
     return true;
 }
 
-String LoRaUartSettings::LoRaUartSettings::toString(void)
+String LoRaUartSettings::LoRaUartSettings::toString(void) const
 {
     return String(ToString(this->buadrate)) + "," + String(this->dataBits) + "," + String(this->stopBits) + "," + ToString(this->parity) + "," + ToString(this->flowControl);
 };
@@ -64,14 +64,14 @@ int LoRaUartSettings::LoRaUartSettings::fromString(String input)
     this->buadrate = Baudrate(baudrate.toInt());
 
     index = input.indexOf(',');
-    String dataBits = input.substring(0, index);
+    String input_data_bits = input.substring(0, index);
     input = input.substring(index);
-    this->dataBits = dataBits.toInt();
+    this->dataBits = input_data_bits.toInt();
 
     index = input.indexOf(',');
-    String stopBits = input.substring(0, index);
+    String input_stop_bits = input.substring(0, index);
     input = input.substring(index);
-    this->stopBits = stopBits.toInt();
+    this->stopBits = input_stop_bits.toInt();
 
     index = input.indexOf(',');
     String parity = input.substring(0, index);
